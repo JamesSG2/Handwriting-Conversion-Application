@@ -1,1 +1,0 @@
-These pieces of code are examples of usage of tesseract that I have found and modified.
