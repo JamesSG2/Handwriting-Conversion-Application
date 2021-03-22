@@ -10,6 +10,7 @@ print("Image sample: ")
 target = input()
 
 # create output files
+os.chdir("..")
 original = cv2.imread('data\\' + name + '\\' + target + '.png', cv2.IMREAD_GRAYSCALE)
 try:
     os.makedirs('output\\' + name + '\\char')
