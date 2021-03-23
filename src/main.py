@@ -9,6 +9,14 @@ name = input()
 print("Image sample: ")
 target = input()
 
+# if we already know the contents we can use it for text correction
+if(target = "pangram"):
+    text_contents = "Aquickbrownfoxjumpsoverthelazydog."
+    line_count = 4
+else:
+    text_contents = ""
+    line_count = 0
+
 # create output files
 os.chdir("..")
 original = cv2.imread('data\\' + name + '\\' + target + '.png', cv2.IMREAD_GRAYSCALE)
@@ -33,10 +41,7 @@ for b in pytesseract.image_to_boxes(img).splitlines():
     text_array.append(b)
     text_string += b[0]
 
-# # testing regex for simple error correction
-# print(text_string)
-# for m in re.finditer(r"d\wg", text_string):
-#     print(str(m.start()) + "-" + str(m.end()))
+
 
 # adds line breaks when a return is detected
 length = len(text_array)
