@@ -10,12 +10,10 @@ print("Image sample: ")
 target = input()
 
 # if we already know the contents we can use it for text correction
-if(target = "pangram"):
-    text_contents = "Aquickbrownfoxjumpsoverthelazydog."
-    line_count = 4
+if(target == "pangram"):
+    text_contents = "Aquickbrownfoxjumpsoverthelazydog.Aqui"
 else:
     text_contents = ""
-    line_count = 0
 
 # create output files
 os.chdir("..")
@@ -41,23 +39,42 @@ for b in pytesseract.image_to_boxes(img).splitlines():
     text_array.append(b)
     text_string += b[0]
 
+# corrects errors in tesseract data using regex
+def full_correction(text_to_correct, correct_text):
+    if(correct_text == ""):
+        return text_to_correct
+    for k in range(1, 5):
+        for i in range((2*k)+4, (2*k)+2, -1):
+            for j in range(k, i-((2*k)-1)):
+                patterns = []
+                for h in range(len(correct_text)-i):
+                    replacement = r"\w" * k
+                    segment = correct_text[h:h+i]
+                    search = segment[0:j] + replacement + segment[j+k: ]
+                    patterns.append(search)
+                    patterns.append(segment)
+                for p in range(0, len(patterns), 2):
+                    text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
+                #print(str(i) + ":" + str(j) + ":str(k) " + corrected)
+    return text_to_correct
 
+text_string = full_correction(text_string, text_contents)
 
 # adds line breaks when a return is detected
 length = len(text_array)
-i = 0
-while i < length-1:
-    current_list = text_array[i]
-    next_list = text_array[i+1]
+m = 0
+while m < length-1:
+    current_list = text_array[m]
+    next_list = text_array[m+1]
     if((int(next_list[1])-int(current_list[1]))>=0):
         readable_string += current_list[0]
     else:
         readable_string += current_list[0] + "\n"
-    i+=1
+    m+=1
 
 # save output string as text file
 with open('output\\' + name + '\\' + target + '.txt', mode ='w') as file:
-    file.write(readable_string)
+    file.write(text_string + "\n\n" + readable_string)
     file.close()
 
 # save each character as a labled image
