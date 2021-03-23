@@ -70,7 +70,7 @@ while m < length-1:
         readable_string += current_list[0]
     else:
         readable_string += current_list[0] + "\n"
-    m+=1
+    m += 1
 
 # save output string as text file
 with open('output\\' + name + '\\' + target + '.txt', mode ='w') as file:
@@ -79,10 +79,14 @@ with open('output\\' + name + '\\' + target + '.txt', mode ='w') as file:
 
 # save each character as a labled image
 char_counter = [0]*27
+box_counter = 0
 for b in text_array:
     # add boxes to main image
-    img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
+    # img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
 
+    # use the corrected text
+    b[0] = text_string[box_counter]
+    box_counter += 1
     # create and save a cropped image of each character
     cropped = resized[h-int(b[4]):h-int(b[2]),int(b[1]):int(b[3])]
     # convert text to unicode and create folders for each letter
