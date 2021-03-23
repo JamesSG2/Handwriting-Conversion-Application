@@ -9,14 +9,6 @@ name = input()
 print("Image sample: ")
 target = input()
 
-# if we already know the contents we can use it for text correction
-if(target = "pangram"):
-    text_contents = "Aquickbrownfoxjumpsoverthelazydog."
-    line_count = 4
-else:
-    text_contents = ""
-    line_count = 0
-
 # create output files
 os.chdir("..")
 original = cv2.imread('data\\' + name + '\\' + target + '.png', cv2.IMREAD_GRAYSCALE)
