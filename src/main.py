@@ -23,11 +23,10 @@ try:
 except OSError:
     pass
 
-# does some filtering to improve quality and get dimensions
+# does some filtering to improve quality and gets dimensions
 resized = cv2.resize(original, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 img = cv2.threshold(resized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 h, w = img.shape
-
 
 # create 2D list and string for storing characters and bounding boxes
 text_array = []
@@ -43,8 +42,11 @@ for b in pytesseract.image_to_boxes(img).splitlines():
 def full_correction(text_to_correct, correct_text):
     if(correct_text == ""):
         return text_to_correct
+    # editor width
     for k in range(1, 5):
+        # chunk length
         for i in range((2*k)+4, (2*k)+2, -1):
+            # editor position
             for j in range(k, i-((2*k)-1)):
                 patterns = []
                 for h in range(len(correct_text)-i):
@@ -55,7 +57,7 @@ def full_correction(text_to_correct, correct_text):
                     patterns.append(segment)
                 for p in range(0, len(patterns), 2):
                     text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
-                #print(str(i) + ":" + str(j) + ":str(k) " + corrected)
+                #print(str(i) + ":" + str(j) + ":str(k) " + text_to_correct)
     return text_to_correct
 
 text_string = full_correction(text_string, text_contents)
