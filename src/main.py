@@ -4,15 +4,20 @@ import os
 import re
 
 def analyze_sample(name, target):
-    # if we already know the contents we can use it for text correction
-    if(target == "pangram"):
-        text_contents = "Aquickbrownfoxjumpsoverthelazydog.Aqui"
-    else:
-        text_contents = ""
 
     # create output files
     os.chdir("..")
     original = cv2.imread('data\\' + name + '\\' + target + '.png', cv2.IMREAD_GRAYSCALE)
+    try:
+        with open('data\\' + name + '\\' + target + '.txt') as file:
+            text_contents = file.read()
+            text_contents = re.sub(r"\s", "", text_contents)
+            text_contents = text_contents + text_contents[0:4]
+            file.close()
+    except FileNotFoundError:
+        print("Couldn't find text file. Will not spellcheck.")
+        text_contents = ""
+
     try:
         os.makedirs('output\\' + name + '\\char')
     except OSError:
@@ -52,22 +57,35 @@ def analyze_sample(name, target):
                         patterns.append(segment)
                     for p in range(0, len(patterns), 2):
                         text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
-                    #print(str(i) + ":" + str(j) + ":str(k) " + text_to_correct)
+                    # print(str(i) + ":" + str(j) + ":" + str(k) + ":" + text_to_correct)
         return text_to_correct
 
+    def new_full_correction(text_to_correct, correct_text):
+        correct_text = correct_text*2
+        for k in range(2,5):
+            patterns = []
+            for h in range(int(float(len(correct_text))/2)):
+                replacement = r"\w" * k
+                segment = correct_text[h:h+(3*k)]
+                search = segment[0:k] + replacement + segment[(2*k): ]
+                patterns.append(search)
+                patterns.append(segment)
+            for p in range(0, len(patterns), 2):
+                text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
+            # print(str(k) + ":" + text_to_correct)
+        return text_to_correct
+    
     text_string = full_correction(text_string, text_contents)
+    print(text_string)
 
     # adds line breaks when a return is detected
-    length = len(text_array)
-    m = 0
-    while m < length-1:
+    for m in range(len(text_array)-1):
         current_list = text_array[m]
         next_list = text_array[m+1]
         if((int(next_list[1])-int(current_list[1]))>=0):
             readable_string += current_list[0]
         else:
             readable_string += current_list[0] + "\n"
-        m += 1
 
     # save output string as text file
     with open('output\\' + name + '\\' + target + '.txt', mode ='w') as file:
