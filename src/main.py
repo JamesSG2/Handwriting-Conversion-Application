@@ -39,29 +39,13 @@ def analyze_sample(name, target):
         text_string += b[0]
 
     # corrects errors in tesseract data using regex
-    def full_correction(text_to_correct, correct_text):
-        if(correct_text == ""):
-            return text_to_correct
-        # editor width
-        for k in range(1, 5):
-            # chunk length
-            for i in range((2*k)+4, (2*k)+2, -1):
-                # editor position
-                for j in range(k, i-((2*k)-1)):
-                    patterns = []
-                    for h in range(len(correct_text)-i):
-                        replacement = r"\w" * k
-                        segment = correct_text[h:h+i]
-                        search = segment[0:j] + replacement + segment[j+k: ]
-                        patterns.append(search)
-                        patterns.append(segment)
-                    for p in range(0, len(patterns), 2):
-                        text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
-                    # print(str(i) + ":" + str(j) + ":" + str(k) + ":" + text_to_correct)
-        return text_to_correct
-
     def new_full_correction(text_to_correct, correct_text):
         correct_text = correct_text*2
+        if(correct_text.islower()):
+            text_to_correct = text_to_correct.lower()
+        elif(correct_text.isupper()):
+            text_to_correct = text_to_correct.upper()
+
         for k in range(2,5):
             patterns = []
             for h in range(int(float(len(correct_text))/2)):
@@ -97,7 +81,7 @@ def analyze_sample(name, target):
     box_counter = 0
     for b in text_array:
         # add boxes to main image
-        img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
+        # img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
         # use the corrected text
         b[0] = text_string[box_counter]
         box_counter += 1
