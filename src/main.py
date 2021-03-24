@@ -12,7 +12,7 @@ def analyze_sample(name, target):
         with open('data\\' + name + '\\' + target + '.txt') as file:
             text_contents = file.read()
             text_contents = re.sub(r"\s", "", text_contents)
-            text_contents = text_contents + text_contents[0:4]
+            # text_contents = text_contents + text_contents[0:4]
             file.close()
     except FileNotFoundError:
         print("Couldn't find text file. Will not spellcheck.")
@@ -74,8 +74,9 @@ def analyze_sample(name, target):
                 text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
             # print(str(k) + ":" + text_to_correct)
         return text_to_correct
-    
-    text_string = full_correction(text_string, text_contents)
+
+    print(text_string)
+    text_string = new_full_correction(text_string, text_contents)
     print(text_string)
 
     # adds line breaks when a return is detected
@@ -96,7 +97,7 @@ def analyze_sample(name, target):
     box_counter = 0
     for b in text_array:
         # add boxes to main image
-        # img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
+        img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
         # use the corrected text
         b[0] = text_string[box_counter]
         box_counter += 1
@@ -116,7 +117,8 @@ def analyze_sample(name, target):
             char_count = len(os.listdir('output\\' + name + '\\char\\' + b[0]))
             location = 'output\\' + name + '\\char\\' + b[0] + '\\' + b[0] + "_" + str(char_count) + '.png'
             cv2.imwrite(location, cropped)
-
+    # cv2.imshow("full", img)
+    # cv2.waitKey(0)
     return True
 
 # imports a test image I scaned of my handwriting
