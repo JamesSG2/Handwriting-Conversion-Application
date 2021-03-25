@@ -31,7 +31,6 @@ def analyze_sample(name, target):
     # create 2D list and string for storing characters and bounding boxes
     text_array = []
     text_string = ""
-    readable_string = ""
     for b in pytesseract.image_to_boxes(img).splitlines():
         # make each line into a list and place in the 2D list
         b = b.split(' ')
@@ -63,18 +62,9 @@ def analyze_sample(name, target):
     text_string = new_full_correction(text_string, text_contents)
     print(text_string)
 
-    # adds line breaks when a return is detected
-    for m in range(len(text_array)-1):
-        current_list = text_array[m]
-        next_list = text_array[m+1]
-        if((int(next_list[1])-int(current_list[1]))>=0):
-            readable_string += current_list[0]
-        else:
-            readable_string += current_list[0] + "\n"
-
     # save output string as text file
     with open('output\\' + name + '\\' + target + '.txt', mode ='w') as file:
-        file.write(text_string + "\n\n" + readable_string)
+        file.write(text_string)
         file.close()
 
     # save each character as a labled image
@@ -90,8 +80,8 @@ def analyze_sample(name, target):
         cropped = resized[h-int(b[4]):h-int(b[2]),int(b[1]):int(b[3])]
 
         # convert text to unicode and create folders for each letter
-        char_num = ord(b[0])-96
-        if((char_num>0) and (char_num<27)):
+        char_num = ord(b[0])
+        if(((char_num>=65) and (char_num<=90)) or ((char_num>=97) and (char_num<=122))):
             try:
                 os.makedirs('output\\' + name + '\\char\\' + b[0])
             except OSError:
