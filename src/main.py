@@ -41,7 +41,6 @@ def analyze_sample(name, target):
 
     try:
         os.makedirs('output\\' + name + '\\char')
-        os.makedirs('output\\' + name + '\\punct')
     except OSError:
         pass
 
@@ -60,6 +59,7 @@ def analyze_sample(name, target):
         text_array.append(b)
         text_string += b[0]
 
+    # run text correction and show before and after
     print(text_string)
     text_string = new_full_correction(text_string, text_contents)
     print(text_string)
@@ -69,30 +69,32 @@ def analyze_sample(name, target):
         file.write(text_string)
         file.close()
 
-    # save each character as a labled image
-    box_counter = 0
-    for b in text_array:
-        # add boxes to main image
-        # img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
-        # use the corrected text
-        b[0] = text_string[box_counter]
-        box_counter += 1
-
-        # create and save a cropped image of each character
-        cropped = resized[h-int(b[4]):h-int(b[2]),int(b[1]):int(b[3])]
-
-        # convert text to unicode and create folders for each letter
-        char_num = ord(b[0])
+    # store cropped images in list with their character
+    image_list = []
+    for i in range(len(text_array)):
+        # crop the image based on tesseract bounding boxes
+        cropped = resized[h-int(text_array[i][4]):h-int(text_array[i][2]),int(text_array[i][1]):int(text_array[i][3])]
+        # get the unicode number of the character and check if it is a letter
+        char_num = ord(text_array[i][0])
         if(((char_num>=65) and (char_num<=90)) or ((char_num>=97) and (char_num<=122))):
-            try:
-                os.makedirs('output\\' + name + '\\char\\' + b[0])
-            except OSError:
-                pass
+            # store cropped image and it's character in a nested list
+            storage_list = [cropped, text_string[i]]
+            image_list.append(storage_list)
 
-            # write image to output file and increment counter
-            char_count = len(os.listdir('output\\' + name + '\\char\\' + b[0]))
-            location = 'output\\' + name + '\\char\\' + b[0] + '\\' + b[0] + "_" + str(char_count) + '.png'
-            cv2.imwrite(location, cropped)
+    # save images in image list avoiding duplicates by appending a number
+    for i in image_list:
+        # try to create output folder
+        try:
+            os.makedirs('output\\' + name + '\\char\\' + i[1])
+        except OSError:
+            pass
+        # check how many images are already in folder
+        char_count = len(os.listdir('output\\' + name + '\\char\\' + i[1]))
+        # save the image with the number of images already in the folder appended to avoid duplicates
+        location = 'output\\' + name + '\\char\\' + i[1] + '\\' + i[1] + "_" + str(char_count) + '.png'
+        cv2.imwrite(location, i[0])
+
+
     # cv2.imshow("full", img)
     # cv2.waitKey(0)
     return True
