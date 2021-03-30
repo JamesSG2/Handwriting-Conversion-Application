@@ -53,7 +53,8 @@ def analyze_sample(name, target):
     # create 2D list and string for storing characters and bounding boxes
     text_array = []
     text_string = ""
-    for b in pytesseract.image_to_boxes(img).splitlines():
+    pytesseract_list = pytesseract.image_to_boxes(img).splitlines()
+    for b in pytesseract_list:
         # make each line into a list and place in the 2D list
         b = b.split(' ')
         text_array.append(b)
