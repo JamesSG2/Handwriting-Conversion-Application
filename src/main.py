@@ -3,16 +3,37 @@ import pytesseract
 import os
 import re
 
-def analyze_sample(name, target):
+# corrects errors in tesseract data using regex
+def new_full_correction(text_to_correct, correct_text):
+    correct_text = correct_text*2
+    if(correct_text.islower()):
+        text_to_correct = text_to_correct.lower()
+    elif(correct_text.isupper()):
+        text_to_correct = text_to_correct.upper()
 
+    for k in range(2,5):
+        patterns = []
+        for h in range(int(float(len(correct_text))/2)):
+            replacement = r"\w" * k
+            segment = correct_text[h:h+(3*k)]
+            search = segment[0:k] + replacement + segment[(2*k): ]
+            patterns.append(search)
+            patterns.append(segment)
+        for p in range(0, len(patterns), 2):
+            text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
+        # print(str(k) + ":" + text_to_correct)
+    return text_to_correct
+
+
+
+def analyze_sample(name, target):
     # create output files
     os.chdir("..")
-    original = cv2.imread('data\\' + name + '\\' + target + '.png', cv2.IMREAD_GRAYSCALE)
+    original = cv2.imread('data\\' + name + '\\' + target + '.png')
     try:
         with open('data\\' + name + '\\' + target + '.txt') as file:
             text_contents = file.read()
             text_contents = re.sub(r"\s", "", text_contents)
-            # text_contents = text_contents + text_contents[0:4]
             file.close()
     except FileNotFoundError:
         print("Couldn't find text file. Will not spellcheck.")
@@ -20,11 +41,13 @@ def analyze_sample(name, target):
 
     try:
         os.makedirs('output\\' + name + '\\char')
+        os.makedirs('output\\' + name + '\\punct')
     except OSError:
         pass
 
     # does some filtering to improve quality and gets dimensions
-    resized = cv2.resize(original, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    gray = cv2.cvtColor(original, cv2.COLOR_BGR2GRAY)
+    resized = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
     img = cv2.threshold(resized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     h, w = img.shape
 
@@ -36,27 +59,6 @@ def analyze_sample(name, target):
         b = b.split(' ')
         text_array.append(b)
         text_string += b[0]
-
-    # corrects errors in tesseract data using regex
-    def new_full_correction(text_to_correct, correct_text):
-        correct_text = correct_text*2
-        if(correct_text.islower()):
-            text_to_correct = text_to_correct.lower()
-        elif(correct_text.isupper()):
-            text_to_correct = text_to_correct.upper()
-
-        for k in range(2,5):
-            patterns = []
-            for h in range(int(float(len(correct_text))/2)):
-                replacement = r"\w" * k
-                segment = correct_text[h:h+(3*k)]
-                search = segment[0:k] + replacement + segment[(2*k): ]
-                patterns.append(search)
-                patterns.append(segment)
-            for p in range(0, len(patterns), 2):
-                text_to_correct = re.sub(patterns[p], patterns[p+1], text_to_correct)
-            # print(str(k) + ":" + text_to_correct)
-        return text_to_correct
 
     print(text_string)
     text_string = new_full_correction(text_string, text_contents)
