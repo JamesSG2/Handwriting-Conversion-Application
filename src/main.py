@@ -3,6 +3,7 @@ import pytesseract
 import os
 import re
 
+#remove this comment later
 # corrects errors in tesseract data using regex
 def new_full_correction(text_to_correct, correct_text):
     correct_text = correct_text*2
