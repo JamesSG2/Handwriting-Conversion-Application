@@ -2,6 +2,7 @@ import cv2
 import pytesseract
 import os
 import re
+import numpy as np
 
 #remove this comment later
 # corrects errors in tesseract data using regex
@@ -25,36 +26,69 @@ def new_full_correction(text_to_correct, correct_text):
         # print(str(k) + ":" + text_to_correct)
     return text_to_correct
 
+def punctuation_analysis(img, text_contents):
+    print(text_contents)
+    # use hsv colorspace
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+    # lower mask (0-10)
+    lower_red = np.array([0,50,50])
+    upper_red = np.array([20,255,255])
+    mask0 = cv2.inRange(img_hsv, lower_red, upper_red)
 
-def analyze_sample(name, target):
-    # create output files
-    os.chdir("..")
-    original = cv2.imread('data\\' + name + '\\' + target + '.png')
-    try:
-        with open('data\\' + name + '\\' + target + '.txt') as file:
-            text_contents = file.read()
-            text_contents = re.sub(r"\s", "", text_contents)
-            file.close()
-    except FileNotFoundError:
-        print("Couldn't find text file. Will not spellcheck.")
-        text_contents = ""
+    # upper mask (170-180)
+    lower_red = np.array([160,50,50])
+    upper_red = np.array([180,255,255])
+    mask1 = cv2.inRange(img_hsv, lower_red, upper_red)
 
-    try:
-        os.makedirs('output\\' + name + '\\char')
-    except OSError:
-        pass
+    # join my masks
+    mask = mask0 + mask1
 
-    # does some filtering to improve quality and gets dimensions
-    gray = cv2.cvtColor(original, cv2.COLOR_BGR2GRAY)
+    # expand mask
+    final_kernel = np.ones((4,4), np.uint8)
+    dialated = cv2.dilate(mask,final_kernel,iterations=1)
+
+    # remove red
+    newmask = cv2.cvtColor(dialated, cv2.COLOR_GRAY2BGR)
+    cleaned = cv2.add(img, newmask)
+
+    # find contours
+    contours_full, hierarchy = cv2.findContours(dialated,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours = contours_full[::2]
+
+    # place a bounding box around each contour
+    boundRect = [None]*len(contours)
+    for i, c in enumerate(contours):
+        boundRect[i] = cv2.boundingRect(contours[i])
+    boundRect.sort()
+
+    # crop boxes and save
+    image_list = []
+    for i in range(len(contours)):
+        cropped = cleaned[int(boundRect[i][1]):int(boundRect[i][1]+boundRect[i][3]),int(boundRect[i][0]):int(boundRect[i][0]+boundRect[i][2])]
+        ordinal = "ord_" + str(ord(text_contents[i]))
+        storage_list = [cropped, ordinal]
+        image_list.append(storage_list)
+
+    # add bounding boxes to img
+    for i in range(len(contours)):
+        color = (0, 0, 0)
+        cv2.rectangle(cleaned, (int(boundRect[i][0]), int(boundRect[i][1])), \
+            (int(boundRect[i][0]+boundRect[i][2]), int(boundRect[i][1]+boundRect[i][3])), color, 2)
+
+    return cleaned, image_list
+
+def character_analysis(img, text_contents):
+    # make image binary and scale up
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     resized = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-    img = cv2.threshold(resized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    h, w = img.shape
+    threshold = cv2.threshold(resized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    h, w, = threshold.shape
 
     # create 2D list and string for storing characters and bounding boxes
     text_array = []
     text_string = ""
-    pytesseract_list = pytesseract.image_to_boxes(img).splitlines()
+    pytesseract_list = pytesseract.image_to_boxes(threshold).splitlines()
     for b in pytesseract_list:
         # make each line into a list and place in the 2D list
         b = b.split(' ')
@@ -64,12 +98,8 @@ def analyze_sample(name, target):
     # run text correction and show before and after
     print(text_string)
     text_string = new_full_correction(text_string, text_contents)
+    print("Corrected to:")
     print(text_string)
-
-    # save output string as text file
-    with open('output\\' + name + '\\' + target + '.txt', mode ='w') as file:
-        file.write(text_string)
-        file.close()
 
     # store cropped images in list with their character
     image_list = []
@@ -83,23 +113,49 @@ def analyze_sample(name, target):
             storage_list = [cropped, text_string[i]]
             image_list.append(storage_list)
 
+    return resized, image_list
+
+def analyze_sample(name, target):
+    # open image
+    os.chdir("..")
+    original = cv2.imread('data\\' + name + '\\' + target + '.png')
+
+    # open text
+    try:
+        with open('data\\' + name + '\\' + target + '.txt') as file:
+            text_contents = file.read()
+            text_contents = re.sub(r"\s", "", text_contents)
+            file.close()
+    except FileNotFoundError:
+        print("Couldn't find text file. Will not spellcheck.")
+        text_contents = ""
+
+    print("Analyzing: " + target + " from " + name)
+    print("Expect to find:")
+    print(text_contents)
+    print("Found:")
+
+    # run correct analysis
+    if("punctuation" in target):
+        img, image_list = punctuation_analysis(original, text_contents)
+    else:
+        img, image_list = character_analysis(original, text_contents)
+
     # save images in image list avoiding duplicates by appending a number
     for i in image_list:
         # try to create output folder
         try:
-            os.makedirs('output\\' + name + '\\char\\' + i[1])
+            os.makedirs('output\\' + name + '\\' + i[1])
         except OSError:
             pass
         # check how many images are already in folder
-        char_count = len(os.listdir('output\\' + name + '\\char\\' + i[1]))
+        char_count = len(os.listdir('output\\' + name + '\\' + i[1]))
         # save the image with the number of images already in the folder appended to avoid duplicates
-        location = 'output\\' + name + '\\char\\' + i[1] + '\\' + i[1] + "_" + str(char_count) + '.png'
+        location = 'output\\' + name + '\\' + i[1] + '\\' + i[1] + "_" + str(char_count) + '.png'
         cv2.imwrite(location, i[0])
 
-
-    # cv2.imshow("full", img)
-    # cv2.waitKey(0)
-    return True
+    print("Saved")
+    return img
 
 # imports a test image I scaned of my handwriting
 print("Name: ")
@@ -107,4 +163,7 @@ name = input()
 print("Image sample: ")
 target = input()
 
-analyze_sample(name, target)
+img = analyze_sample(name, target)
+cv2.imshow("full", img)
+cv2.waitKey(0)
+print("Done")
