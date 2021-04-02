@@ -3,6 +3,10 @@ import pytesseract
 import os
 import re
 
+# insert your own specific tesseract.exe PATH to run -- Not sure yet how to make it more generalized. Hope to
+# figure that out in the next meeting
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
 # imports a test image I scaned of my handwriting
 print("Name: ")
 name = input()
@@ -46,6 +50,10 @@ while i < length-1:
     else:
         readable_string += current_list[0] + "\n"
     i+=1
+
+#text = pytesseract.image_to_string(img.open('data\\' + name + '\\' + target + '.png'))
+#conf = text.groupby(['block_num'])['conf'].mean()
+#print(conf)
 
 # save output string as text file
 with open('output\\' + name + '\\' + target + '.txt', mode ='w') as file:
