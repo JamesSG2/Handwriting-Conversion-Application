@@ -157,6 +157,9 @@ def analyze_sample(name, target):
     print("Saved")
     return img
 
+def output_handwriting(name):
+    # this will be used when outputting the reproduction of your handwriting
+
 # imports a test image I scaned of my handwriting
 print("Name: ")
 name = input()
