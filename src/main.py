@@ -3,9 +3,9 @@ import pytesseract
 import os
 import re
 import numpy as np
+import random
 
-#remove this comment later
-# corrects errors in tesseract data using regex
+# These functions handle the initial processing of the handwriting images
 def new_full_correction(text_to_correct, correct_text):
     correct_text = correct_text*2
     if(correct_text.islower()):
@@ -117,7 +117,6 @@ def character_analysis(img, text_contents):
 
 def analyze_sample(name, target):
     # open image
-    os.chdir("..")
     original = cv2.imread('data\\' + name + '\\' + target + '.png')
 
     # open text
@@ -157,16 +156,82 @@ def analyze_sample(name, target):
     print("Saved")
     return img
 
+# These functions handle the reproduction of the handwriting
+def create_blank(width, height, rgb_color=(0, 0, 0)):
+    image = np.zeros((height, width, 3), np.uint8)
+    color = tuple(reversed(rgb_color))
+    image[:] = color
+    return image
+
+def hconcat_resize(img_list, interpolation = cv2.INTER_CUBIC):
+    # take minimum hights
+    h_size = min(img.shape[0] for img in img_list)
+
+    # image resizing
+    im_list_resize = [cv2.resize(img, (int(img.shape[1] * h_size / img.shape[0]), h_size), interpolation = interpolation) for img in img_list]
+
+    # return final image
+    return cv2.hconcat(im_list_resize)
+
+def add_char(original_img, char_img):
+    output = hconcat_resize([original_img, char_img])
+    return output
+
 def output_handwriting(name):
     # this will be used when outputting the reproduction of your handwriting
+    print("What should be written:")
+    phrase = input()
 
-# imports a test image I scaned of my handwriting
-print("Name: ")
-name = input()
-print("Image sample: ")
-target = input()
+    output_image = create_blank(10,50, (255,255,255))
 
-img = analyze_sample(name, target)
-cv2.imshow("full", img)
-cv2.waitKey(0)
-print("Done")
+    for char in phrase:
+        char_num = ord(char)
+        if(((char_num>=65) and (char_num<=90)) or ((char_num>=97) and (char_num<=122))):
+            try:
+                char_count = len(os.listdir('output\\' + name + '\\' + char))
+            except FileNotFoundError:
+                print("could not find letter:" + char)
+                continue
+            if (char_count == 0):
+                print("could not find letter:" + char)
+                continue
+
+            char_select = random.randint(0, char_count-1)
+            char_img = cv2.imread('output\\' + name + '\\' + char + '\\' + char + "_" + str(char_select) + '.png')
+            output_image = add_char(output_image, char_img)
+        elif(char_num==32):
+            char_img = create_blank(50,50, (255,255,255))
+            output_image = add_char(output_image, char_img)
+
+    return output_image
+
+def main():
+
+    os.chdir("..")
+    print("Analyze new samples? [Y/N]:")
+    analysis = input()
+
+    if(analysis=="Y"):
+        print("Name: ")
+        name = input()
+        print("Image sample: ")
+        target = input()
+
+        img = analyze_sample(name, target)
+        # cv2.imshow("full", img)
+        # cv2.waitKey(0)
+
+    elif(analysis=="N"):
+        print("Name: ")
+        name = input()
+        img = output_handwriting(name)
+        cv2.imshow("output", img)
+        cv2.waitKey(0)
+
+    else:
+        print("Error, did not select [Y/N]")
+
+    print("Done")
+
+if __name__ == '__main__':
+    main()
