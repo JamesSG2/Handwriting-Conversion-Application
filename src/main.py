@@ -142,15 +142,25 @@ def analyze_sample(name, target):
 
     # save images in image list avoiding duplicates by appending a number
     for i in image_list:
+        # check case
+        case = ""
+        if i[1].isupper():
+            case = "u"
+        elif i[1].islower():
+            case = "l"
+        else:
+            case = "p"
+        character_id = i[1] + "_" + case
+
         # try to create output folder
         try:
-            os.makedirs('output\\' + name + '\\' + i[1])
+            os.makedirs('output\\' + name + '\\' + character_id)
         except OSError:
             pass
         # check how many images are already in folder
-        char_count = len(os.listdir('output\\' + name + '\\' + i[1]))
+        char_count = len(os.listdir('output\\' + name + '\\' + character_id))
         # save the image with the number of images already in the folder appended to avoid duplicates
-        location = 'output\\' + name + '\\' + i[1] + '\\' + i[1] + "_" + str(char_count) + '.png'
+        location = 'output\\' + name + '\\' + character_id + '\\' + character_id + "_" + str(char_count) + '.png'
         cv2.imwrite(location, i[0])
 
     print("Saved")
@@ -185,10 +195,20 @@ def output_handwriting(name):
     output_image = create_blank(10,50, (255,255,255))
 
     for char in phrase:
+        # check case
+        case = ""
+        if char.isupper():
+            case = "u"
+        elif char.islower():
+            case = "l"
+        else:
+            case = "p"
+        character_id = char + "_" + case
         char_num = ord(char)
+
         if(((char_num>=65) and (char_num<=90)) or ((char_num>=97) and (char_num<=122))):
             try:
-                char_count = len(os.listdir('output\\' + name + '\\' + char))
+                char_count = len(os.listdir('output\\' + name + '\\' + character_id))
             except FileNotFoundError:
                 print("could not find letter:" + char)
                 continue
@@ -197,14 +217,16 @@ def output_handwriting(name):
                 continue
 
             char_select = random.randint(0, char_count-1)
-            char_img = cv2.imread('output\\' + name + '\\' + char + '\\' + char + "_" + str(char_select) + '.png')
+            char_img = cv2.imread('output\\' + name + '\\' + character_id + '\\' + character_id + "_" + str(char_select) + '.png')
             output_image = add_char(output_image, char_img)
+
         elif(char_num==32):
             char_img = create_blank(50,50, (255,255,255))
             output_image = add_char(output_image, char_img)
 
     return output_image
 
+# These functions run the program
 def main():
 
     os.chdir("..")
