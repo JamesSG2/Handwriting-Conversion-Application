@@ -187,10 +187,8 @@ def add_char(original_img, char_img):
     output = hconcat_resize([original_img, char_img])
     return output
 
-def output_handwriting(name):
+def output_handwriting(name, phrase):
     # this will be used when outputting the reproduction of your handwriting
-    print("What should be written:")
-    phrase = input()
 
     output_image = create_blank(10,50, (255,255,255))
 
@@ -230,6 +228,7 @@ def output_handwriting(name):
 def main():
 
     os.chdir("..")
+    # hopefully this section can have it's functionality replaced by the GUI
     print("Analyze new samples? [Y/N]:")
     analysis = input()
 
@@ -246,7 +245,9 @@ def main():
     elif(analysis=="N"):
         print("Name: ")
         name = input()
-        img = output_handwriting(name)
+        print("What should be written:")
+        phrase = input()
+        img = output_handwriting(name, phrase)
         cv2.imshow("output", img)
         cv2.waitKey(0)
 
