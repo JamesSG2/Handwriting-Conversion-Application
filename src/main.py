@@ -162,10 +162,10 @@ def analyze_sample(name, target):
 
 # These functions handle the reproduction of the handwriting
 def create_blank(width, height, rgb_color=(0, 0, 0)):
-    image = np.zeros((height, width, 3), np.uint8)
+    blank = np.zeros((height, width, 3), np.uint8)
     color = tuple(reversed(rgb_color))
-    image[:] = color
-    return image
+    blank[:] = color
+    return blank
 
 def hconcat_whitespace(img1, img2):
     vert_diff = img1.shape[0]-img2.shape[0]
@@ -183,7 +183,7 @@ def hconcat_whitespace(img1, img2):
 def output_handwriting(name, phrase):
     # this will be used when outputting the reproduction of your handwriting
 
-    output_image = create_blank(10,50, (255,255,255))
+    output_image = create_blank(10,75, (0,0,0))
 
     for char in phrase:
         char_num = ord(char)
@@ -208,6 +208,18 @@ def output_handwriting(name, phrase):
         elif(char_num==32):
             char_img = create_blank(50,50, (255,255,255))
             output_image = hconcat_whitespace(output_image, char_img)
+
+    try:
+        os.makedirs('output\\' + name + '\\writing_result')
+    except OSError:
+        pass
+    # check how many images are already in folder
+    result_count = len(os.listdir('output\\' + name + '\\writing_result'))
+    # save the image with the number of images already in the folder
+    # appended to avoid duplicates
+    location = 'output\\' + name + '\\writing_result\\result' \
+        + "_" + str(result_count) + '.png'
+    cv2.imwrite(location, output_image)
 
     return output_image
 
