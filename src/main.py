@@ -86,6 +86,8 @@ def character_analysis(img, text_contents):
     # create 2D list and string for storing characters and bounding boxes
     text_array = []
     text_string = ""
+
+    # get predictions from pytesseract and place bounding boxes in an array
     pytesseract_list = pytesseract.image_to_boxes(threshold).splitlines()
     for b in pytesseract_list:
         # make each line into a list and place in the 2D list
