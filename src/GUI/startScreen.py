@@ -9,25 +9,32 @@ import numpy
 resolutionWidth = 1280
 resolutionHeight = 720
 
-# setting up root
+# function that gets called when the toTextButton is clicked
+def onToTextButtonClick():
+    print('toTextButton Clicked')
 
+# function that getes called when toWritingButton is clicked
+def onToWritingButtonClick():
+    print('toWritingButton Clicked')    
+
+
+# setting up root
 root = Tk()
 root.title('Handwriting')
 root.geometry('{}x{}'.format(resolutionWidth, resolutionHeight))
-root.resizable(width = False, height = False)
+root.minsize(600, 300)
 
 # setting styles
-
 style = Style()
-style.configure('Button.TButton', font = ('Arial', int(numpy.minimum(int(resolutionWidth * 0.4), int(resolutionHeight * 0.8)) * 0.05)))
+style.configure('Button.TButton', font = ('Calibri', 20))
 
 # adding buttons
+toTextButton = Button(root, text = 'Create Profile', style = 'Button.TButton', command = onToTextButtonClick)
+toTextButton.place(relx = 0.05, rely = 0.1, relwidth = 0.4, relheight = 0.8)
 
-toTextButton = Button(root, text = 'Convert Handwriting to Text', style = 'Button.TButton')
-toTextButton.place(x = int(resolutionWidth * 0.05), y = int(resolutionHeight * 0.1), width = int(resolutionWidth * 0.4), height = int(resolutionHeight * 0.8))
+toWritingButton = Button(root, text = 'Create Handwriting', style = 'Button.TButton', command = onToWritingButtonClick)
+toWritingButton.place(relx = 0.55, rely = 0.1, relwidth = 0.4, relheight = 0.8)
 
-toWritingButton = Button(root, text = 'Convert Text to Handwriting', style = 'Button.TButton')
-toWritingButton.place(x = int(resolutionWidth * 0.55), y = int(resolutionHeight * 0.1), width = int(resolutionWidth * 0.4), height = int(resolutionHeight * 0.8))
 
 
 root.mainloop()
