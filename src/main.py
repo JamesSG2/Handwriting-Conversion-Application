@@ -55,6 +55,7 @@ def punctuation_analysis(img, text_contents):
     # find contours
     contours_full, hierarchy = cv2.findContours(dialated,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     contours = contours_full[::2]
+
     # place a bounding box around each contour
     boundRect = [None]*len(contours)
     for i, c in enumerate(contours):
