@@ -70,17 +70,8 @@ def punctuation_analysis(img, text_contents):
         cropped = cleaned[int(boundRect[i][1]):int(boundRect[i][1] \
             +boundRect[i][3]), \
             int(boundRect[i][0]):int(boundRect[i][0]+boundRect[i][2])]
-
-        ordinal = "ord_" + str(ord(text_contents[i]))
-        storage_list = [cropped, ordinal]
+        storage_list = [cropped, text_contents[i]]
         image_list.append(storage_list)
-
-    # add bounding boxes to img
-    for i in range(len(contours)):
-        color = (0, 0, 0)
-        cv2.rectangle(cleaned, (int(boundRect[i][0]), int(boundRect[i][1])), \
-            (int(boundRect[i][0]+boundRect[i][2]), \
-            int(boundRect[i][1]+boundRect[i][3])), color, 2)
 
     return cleaned, image_list
 
@@ -152,14 +143,14 @@ def analyze_sample(name, target):
     # save images in image list avoiding duplicates by appending a number
     for i in image_list:
         # check case
-        case = ""
-        if i[1].isupper():
-            case = "u"
-        elif i[1].islower():
-            case = "l"
-        else:
-            case = "p"
-        character_id = i[1] + "_" + case
+        # case = ""
+        # if i[1].isupper():
+        #     case = "u"
+        # elif i[1].islower():
+        #     case = "l"
+        # else:
+        #     case = "p"
+        character_id = str(ord(i[1]))
 
         # try to create output folder
         try:
@@ -184,6 +175,19 @@ def create_blank(width, height, rgb_color=(0, 0, 0)):
     image[:] = color
     return image
 
+def hconcat_whitespace(img1, img2):
+    vert_diff = img1.shape[0]-img2.shape[0]
+    if(vert_diff>0):
+        pad = create_blank(img2.shape[1], vert_diff, (255,255,255))
+        img2_padded = cv2.vconcat([pad, img2])
+        return cv2.hconcat([img1, img2_padded])
+    elif(vert_diff<0):
+        pad = create_blank(img1.shape[1], abs(vert_diff), (255,255,255))
+        img1_padded = cv2.vconcat([pad, img1])
+        return cv2.hconcat([img1_padded, img1_padded])
+    else:
+        return cv2.hconcat([img1, img2])
+
 def hconcat_resize(img_list, interpolation = cv2.INTER_CUBIC):
     # take minimum hights
     h_size = min(img.shape[0] for img in img_list)
@@ -206,21 +210,21 @@ def output_handwriting(name, phrase):
 
     for char in phrase:
         # check case
-        case = ""
-        if char.isupper():
-            case = "u"
-        elif char.islower():
-            case = "l"
-        else:
-            case = "p"
-        character_id = char + "_" + case
+        # case = ""
+        # if char.isupper():
+        #     case = "u"
+        # elif char.islower():
+        #     case = "l"
+        # else:
+        #     case = "p"
+        # character_id = char + "_" + case
         char_num = ord(char)
+        char_str = str(char_num)
 
-        if(((char_num>=65) and (char_num<=90)) \
-            or ((char_num>=97) and (char_num<=122))):
+        if(char_num>32):
             try:
                 char_count = len(os.listdir('output\\' + name + '\\' \
-                    + character_id))
+                    + char_str))
             except FileNotFoundError:
                 print("could not find letter:" + char)
                 continue
@@ -229,13 +233,13 @@ def output_handwriting(name, phrase):
                 continue
 
             char_select = random.randint(0, char_count-1)
-            char_img = cv2.imread('output\\' + name + '\\' + character_id \
-                + '\\' + character_id + "_" + str(char_select) + '.png')
-            output_image = add_char(output_image, char_img)
+            char_img = cv2.imread('output\\' + name + '\\' + char_str \
+                + '\\' + char_str + "_" + str(char_select) + '.png')
+            output_image = hconcat_whitespace(output_image, char_img)
 
         elif(char_num==32):
             char_img = create_blank(50,50, (255,255,255))
-            output_image = add_char(output_image, char_img)
+            output_image = hconcat_whitespace(output_image, char_img)
 
     return output_image
 
