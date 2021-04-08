@@ -188,20 +188,20 @@ def hconcat_whitespace(img1, img2):
     else:
         return cv2.hconcat([img1, img2])
 
-def hconcat_resize(img_list, interpolation = cv2.INTER_CUBIC):
-    # take minimum hights
-    h_size = min(img.shape[0] for img in img_list)
-
-    # image resizing
-    im_list_resize = [cv2.resize(img, (int(img.shape[1]*h_size/img.shape[0]), \
-        h_size), interpolation = interpolation) for img in img_list]
-
-    # return final image
-    return cv2.hconcat(im_list_resize)
-
-def add_char(original_img, char_img):
-    output = hconcat_resize([original_img, char_img])
-    return output
+# def hconcat_resize(img_list, interpolation = cv2.INTER_CUBIC):
+#     # take minimum hights
+#     h_size = min(img.shape[0] for img in img_list)
+#
+#     # image resizing
+#     im_list_resize = [cv2.resize(img, (int(img.shape[1]*h_size/img.shape[0]), \
+#         h_size), interpolation = interpolation) for img in img_list]
+#
+#     # return final image
+#     return cv2.hconcat(im_list_resize)
+#
+# def add_char(original_img, char_img):
+#     output = hconcat_resize([original_img, char_img])
+#     return output
 
 def output_handwriting(name, phrase):
     # this will be used when outputting the reproduction of your handwriting
