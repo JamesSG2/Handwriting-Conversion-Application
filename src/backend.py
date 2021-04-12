@@ -181,6 +181,7 @@ def hconcat_whitespace(img1, img2):
         return cv2.hconcat([img1_padded, img1_padded])
     else:
         return cv2.hconcat([img1, img2])
+
 def save_line_image(name, image_to_save):
     try:
         os.makedirs('output\\' + name + '\\writing_result')
@@ -206,13 +207,38 @@ def get_char_rand(name, char):
                 + char_str))
         except FileNotFoundError:
             print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255)), 0
+
+        if (char_count == 0):
+            print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255)), 0
+
+        char_select = random.randint(0, char_count-1)
+        char_img = cv2.imread('output\\' + name + '\\' + char_str \
+            + '\\' + char_str + "_" + str(char_select) + '.png')
+
+    else:
+        char_img = create_blank(50,50, (255,255,255))
+        char_select = 0
+
+    return char_img, char_select
+
+def get_char(name, char, char_select):
+    char_num = ord(char)
+    char_str = str(char_num)
+
+    if(char_num>32):
+        try:
+            char_count = len(os.listdir('output\\' + name + '\\' \
+                + char_str))
+        except FileNotFoundError:
+            print("could not find letter:" + char)
             return create_blank(5,5, (255,255,255))
 
         if (char_count == 0):
             print("could not find letter:" + char)
             return create_blank(5,5, (255,255,255))
 
-        char_select = random.randint(0, char_count-1)
         char_img = cv2.imread('output\\' + name + '\\' + char_str \
             + '\\' + char_str + "_" + str(char_select) + '.png')
 
@@ -221,18 +247,21 @@ def get_char_rand(name, char):
 
     return char_img
 
-def output_handwriting(name, phrase):
+def output_handwriting_sample(name, phrase):
     # this will be used when outputting the reproduction of your handwriting
 
     output_image = create_blank(10,75, (0,0,0))
+    selection_list = []
 
     for char in phrase:
-        char_img = get_char_rand(name, char)
+        char_img, char_pos = get_char_rand(name, char)
         output_image = hconcat_whitespace(output_image, char_img)
+        selection_list.append(char_pos)
 
     save_line_image(name, output_image)
+    print(selection_list)
 
-    return output_image
+    return output_image, selection_list
 
 # These functions run the program
 def main():
@@ -257,7 +286,7 @@ def main():
         name = input()
         print("What should be written:")
         phrase = input()
-        img = output_handwriting(name, phrase)
+        img, selection_list = output_handwriting_sample(name, phrase)
         cv2.imshow("output", img)
         cv2.waitKey(0)
 
