@@ -233,19 +233,20 @@ def get_char(name, char, char_select):
                 + char_str))
         except FileNotFoundError:
             print("could not find letter:" + char)
-            return create_blank(5,5, (255,255,255))
+            return create_blank(5,5, (255,255,255)), 0
 
         if (char_count == 0):
             print("could not find letter:" + char)
-            return create_blank(5,5, (255,255,255))
+            return create_blank(5,5, (255,255,255)), 0
 
         char_img = cv2.imread('output\\' + name + '\\' + char_str \
             + '\\' + char_str + "_" + str(char_select) + '.png')
 
     elif(char_num==32):
         char_img = create_blank(50,50, (255,255,255))
+        char_select = 0
 
-    return char_img
+    return char_img, char_select
 
 def output_handwriting_sample(name, phrase):
     # this will be used when outputting the reproduction of your handwriting
@@ -258,10 +259,34 @@ def output_handwriting_sample(name, phrase):
         output_image = hconcat_whitespace(output_image, char_img)
         selection_list.append(char_pos)
 
-    save_line_image(name, output_image)
+    # save_line_image(name, output_image)
     print(selection_list)
 
     return output_image, selection_list
+
+def output_handwriting_revision(name, phrase, previous_list, list_of_errors):
+
+    output_image = create_blank(10,75, (0,0,0))
+    selection_list = []
+
+    for i in range(len(phrase)):
+        if(list_of_errors[i]):
+            char_img, char_pos = get_char_rand(name, phrase[i])
+        else:
+            char_img, char_pos = get_char(name, phrase[i], previous_list[i])
+        output_image = hconcat_whitespace(output_image, char_img)
+        selection_list.append(char_pos)
+
+    # save_line_image(name, output_image)
+    print(selection_list)
+
+    return output_image, selection_list
+
+def create_correction_list(list_of_positions, length):
+    list_of_corrections = [False] * length
+    for position in list_of_positions:
+        list_of_corrections[int(position)] = True
+    return list_of_corrections
 
 # These functions run the program
 def main():
@@ -287,6 +312,21 @@ def main():
         print("What should be written:")
         phrase = input()
         img, selection_list = output_handwriting_sample(name, phrase)
+        cv2.imshow("output", img)
+        cv2.waitKey(0)
+        print("Is correction needed? [Y/N]:")
+        needed = input().lower()
+        while needed == "y":
+            print("Correction locations?")
+            corrections = input().split(',')
+            list_of_corrections = create_correction_list(corrections, len(selection_list))
+            img, selection_list = output_handwriting_revision(name, phrase, \
+                selection_list, list_of_corrections)
+            cv2.imshow("output", img)
+            cv2.waitKey(0)
+            print("Is correction needed? [Y/N]:")
+            needed = input().lower()
+        save_line_image(name, img)
         cv2.imshow("output", img)
         cv2.waitKey(0)
 
