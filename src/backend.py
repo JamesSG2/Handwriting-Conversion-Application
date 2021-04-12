@@ -115,7 +115,7 @@ def character_analysis(img, text_contents):
         text_string += b[0]
     print(text_string)
 
-    # Finds the Confidence level for each prediction, and removes words below the minimum Confidence Level
+    # Finds the confidence level for each prediction, and removes words below the minimum confidence Level
     rejected_letters = low_confidence_rejection(pytesseract_list, threshold)  # returns rejected letters and their bounding boxes (if ever needed)
 
     #Adds confident words to the uncorrected text
