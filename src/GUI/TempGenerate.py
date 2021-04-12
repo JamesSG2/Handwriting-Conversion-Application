@@ -7,7 +7,7 @@ class TempGenerate(tk.Frame):
         self.parent = parent
 
         # adding widgets to frame
-        self.profileButton = ttk.Button(self, text = "Create and Manage Profiles", width = 30, command = lambda: controller.showFrame("TempProfile"))
+        self.profileButton = ttk.Button(self, text = "Nothing Here", width = 30, command = lambda: controller.showFrame("TempProfile"))
         self.generateButton = ttk.Button(self, text = "Back", width = 30, command = lambda: controller.showFrame("StartScreen"))
 
         # placing frame and widgets on frame

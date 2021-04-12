@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
+import os
 
-from StartScreen import StartScreen
-from TempProfile import TempProfile
-from TempGenerate import TempGenerate
+from startScreen import StartScreen
+from tempProfile import TempProfile
+from tempGenerate import TempGenerate
+from profileSelectScreen import ProfileSelectScreen
 
 class HandwritingApp(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -16,8 +18,11 @@ class HandwritingApp(tk.Tk):
         self.columnconfigure(0, weight = 1)
         self.rowconfigure(0, weight = 1)
 
+        self.profileList = []
+        self.searchProfiles()
+
         self.frames = {}
-        for F in (StartScreen, TempProfile, TempGenerate):
+        for F in (StartScreen, TempProfile, TempGenerate, ProfileSelectScreen):
             screenName = F.__name__
             frame = F(parent = container, controller = self)
             self.frames[screenName] = frame
@@ -28,6 +33,11 @@ class HandwritingApp(tk.Tk):
         frame = self.frames[screenName]
         frame.tkraise()
 
+    def searchProfiles(self):
+        root='output'
+        self.profileList = [ item for item in os.listdir(root) if os.path.isdir(os.path.join(root, item)) ]
+        print (self.profileList)
+        #self.after(1000, self.searchProfiles)
 
 def main():
     root = HandwritingApp()

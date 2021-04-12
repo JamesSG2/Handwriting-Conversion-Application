@@ -8,7 +8,7 @@ class StartScreen(tk.Frame):
 
         # adding widgets to frame
         self.profileButton = ttk.Button(self, text = "Create and Manage Profiles", width = 30, command = lambda: controller.showFrame("TempProfile"))
-        self.generateButton = ttk.Button(self, text = "Generate Handwriting", width = 30, command = lambda: controller.showFrame("TempGenerate"))
+        self.generateButton = ttk.Button(self, text = "Generate Handwriting", width = 30, command = lambda: controller.showFrame("ProfileSelectScreen"))
 
         # placing frame and widgets on frame
         self.grid(column = 0, row = 0, sticky = "nsew")
