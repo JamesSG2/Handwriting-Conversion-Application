@@ -181,36 +181,7 @@ def hconcat_whitespace(img1, img2):
         return cv2.hconcat([img1_padded, img1_padded])
     else:
         return cv2.hconcat([img1, img2])
-
-def output_handwriting(name, phrase):
-    # this will be used when outputting the reproduction of your handwriting
-
-    output_image = create_blank(10,75, (0,0,0))
-
-    for char in phrase:
-        char_num = ord(char)
-        char_str = str(char_num)
-
-        if(char_num>32):
-            try:
-                char_count = len(os.listdir('output\\' + name + '\\' \
-                    + char_str))
-            except FileNotFoundError:
-                print("could not find letter:" + char)
-                continue
-            if (char_count == 0):
-                print("could not find letter:" + char)
-                continue
-
-            char_select = random.randint(0, char_count-1)
-            char_img = cv2.imread('output\\' + name + '\\' + char_str \
-                + '\\' + char_str + "_" + str(char_select) + '.png')
-            output_image = hconcat_whitespace(output_image, char_img)
-
-        elif(char_num==32):
-            char_img = create_blank(50,50, (255,255,255))
-            output_image = hconcat_whitespace(output_image, char_img)
-
+def save_line_image(name, image_to_save):
     try:
         os.makedirs('output\\' + name + '\\writing_result')
     except OSError:
@@ -221,7 +192,45 @@ def output_handwriting(name, phrase):
     # appended to avoid duplicates
     location = 'output\\' + name + '\\writing_result\\result' \
         + "_" + str(result_count) + '.png'
-    cv2.imwrite(location, output_image)
+    cv2.imwrite(location, image_to_save)
+
+    return True
+
+def get_char_rand(name, char):
+    char_num = ord(char)
+    char_str = str(char_num)
+
+    if(char_num>32):
+        try:
+            char_count = len(os.listdir('output\\' + name + '\\' \
+                + char_str))
+        except FileNotFoundError:
+            print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255))
+
+        if (char_count == 0):
+            print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255))
+
+        char_select = random.randint(0, char_count-1)
+        char_img = cv2.imread('output\\' + name + '\\' + char_str \
+            + '\\' + char_str + "_" + str(char_select) + '.png')
+
+    elif(char_num==32):
+        char_img = create_blank(50,50, (255,255,255))
+
+    return char_img
+
+def output_handwriting(name, phrase):
+    # this will be used when outputting the reproduction of your handwriting
+
+    output_image = create_blank(10,75, (0,0,0))
+
+    for char in phrase:
+        char_img = get_char_rand(name, char)
+        output_image = hconcat_whitespace(output_image, char_img)
+
+    save_line_image(name, output_image)
 
     return output_image
 
