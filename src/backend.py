@@ -27,6 +27,29 @@ def new_full_correction(text_to_correct, correct_text):
         # print(str(k) + ":" + text_to_correct)
     return text_to_correct
 
+def low_confidence_rejection(pytesseract_list, threshold):
+    # Finds low confidence words and their respective letters
+    k = 0
+    minimum_confidence_level = 55    # <<< feel free to adjust if necessary (CL: 0 to 100)
+    unconfident_letters = []
+    confident_pytesseract_list = []
+    for n in pytesseract_list:
+        confident_pytesseract_list.append(n)
+    pytesseract_data = pytesseract.image_to_data(threshold, output_type='data.frame')
+    for i in range(0, len(pytesseract_data)):
+        if pytesseract_data.conf[i] == -1:
+            continue
+        for j in range(k, k + len(str(pytesseract_data.text[i]))):
+            if pytesseract_data.conf[i] < minimum_confidence_level:
+                unconfident_letters.append(pytesseract_list[j])
+        k += len(str(pytesseract_data.text[i]))
+
+    # Removes low confidence words and their respective letters
+    for n in unconfident_letters:
+        confident_pytesseract_list.remove(n)
+
+    return confident_pytesseract_list
+
 def punctuation_analysis(img, text_contents):
     print(text_contents)
     # use hsv colorspace
@@ -89,16 +112,28 @@ def character_analysis(img, text_contents):
 
     # get predictions from pytesseract and place bounding boxes in an array
     pytesseract_list = pytesseract.image_to_boxes(threshold).splitlines()
+
+    #Shows what was originally found
     for b in pytesseract_list:
+        text_string += b[0]
+    print(text_string)
+
+    # Finds the confidence level for each prediction, and removes words below the minimum confidence Level
+    confident_pytesseract_list = low_confidence_rejection(pytesseract_list, threshold)  # returns confident letters and their bounding boxes after removing low confidence results
+
+    #Adds confident words to the uncorrected text
+    text_string = ""
+    for b in confident_pytesseract_list:
         # make each line into a list and place in the 2D list
         b = b.split(' ')
         text_array.append(b)
         text_string += b[0]
 
-    # run text correction and show before and after
+    # now run text correction and show before and after
+    print("\nRemoved Low Confidence Results:")
     print(text_string)
     text_string = new_full_correction(text_string, text_contents)
-    print("Corrected to:")
+    print("\nCorrected to:")
     print(text_string)
 
     # store cropped images in list with their character
@@ -132,9 +167,9 @@ def analyze_sample(name, target):
         text_contents = ""
 
     print("Analyzing: " + target + " from " + name)
-    print("Expect to find:")
+    print("\nExpect to find:")
     print(text_contents)
-    print("Found:")
+    print("\nFound:")
 
     # run correct analysis
     if("punctuation" in target):
