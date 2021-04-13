@@ -178,7 +178,7 @@ def hconcat_whitespace(img1, img2):
     elif(vert_diff<0):
         pad = create_blank(img1.shape[1], abs(vert_diff), (255,255,255))
         img1_padded = cv2.vconcat([pad, img1])
-        return cv2.hconcat([img1_padded, img1_padded])
+        return cv2.hconcat([img1_padded, img1_padded]) # needs to be corrected, I'll do it later
     else:
         return cv2.hconcat([img1, img2])
 
@@ -198,10 +198,12 @@ def save_line_image(name, image_to_save):
     return True
 
 def get_char_rand(name, char):
+    # used to select a random character image
     char_num = ord(char)
     char_str = str(char_num)
-
+    # if the character is not whitespace
     if(char_num>32):
+        # check how many if any of the character exists
         try:
             char_count = len(os.listdir('output\\' + name + '\\' \
                 + char_str))
@@ -212,18 +214,21 @@ def get_char_rand(name, char):
         if (char_count == 0):
             print("could not find letter:" + char)
             return create_blank(5,5, (255,255,255)), 0
-
+        # select a random character
         char_select = random.randint(0, char_count-1)
         char_img = cv2.imread('output\\' + name + '\\' + char_str \
             + '\\' + char_str + "_" + str(char_select) + '.png')
 
     else:
+        # if the character is whitespace use a white square
         char_img = create_blank(50,50, (255,255,255))
         char_select = 0
 
     return char_img, char_select
 
 def get_char(name, char, char_select):
+    # used to select predetermined character image
+    # essentially the same as get_char_rand
     char_num = ord(char)
     char_str = str(char_num)
 
@@ -249,8 +254,7 @@ def get_char(name, char, char_select):
     return char_img, char_select
 
 def output_handwriting_sample(name, phrase):
-    # this will be used when outputting the reproduction of your handwriting
-
+    # this will be used when outputting a first draft sample of your handwriting
     output_image = create_blank(10,75, (0,0,0))
     selection_list = []
 
@@ -270,6 +274,8 @@ def output_handwriting_revision(name, phrase, previous_list, list_of_errors):
     selection_list = []
 
     for i in range(len(phrase)):
+        # if a character was marked as needing correction get a random new image
+        # otherwise use the same image as before
         if(list_of_errors[i]):
             char_img, char_pos = get_char_rand(name, phrase[i])
         else:
@@ -283,6 +289,7 @@ def output_handwriting_revision(name, phrase, previous_list, list_of_errors):
     return output_image, selection_list
 
 def create_correction_list(list_of_positions, length):
+    # returns list containing False if the character does not need correction
     list_of_corrections = [False] * length
     for position in list_of_positions:
         list_of_corrections[int(position)] = True
