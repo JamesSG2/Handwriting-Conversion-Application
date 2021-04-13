@@ -178,7 +178,7 @@ def hconcat_whitespace(img1, img2):
     elif(vert_diff<0):
         pad = create_blank(img1.shape[1], abs(vert_diff), (255,255,255))
         img1_padded = cv2.vconcat([pad, img1])
-        return cv2.hconcat([img1_padded, img1_padded]) # needs to be corrected, I'll do it later
+        return cv2.hconcat([img1_padded, img1_padded])
     else:
         return cv2.hconcat([img1, img2])
 
