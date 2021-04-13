@@ -32,6 +32,9 @@ def low_confidence_rejection(pytesseract_list, threshold):
     k = 0
     minimum_confidence_level = 55    # <<< feel free to adjust if necessary (CL: 0 to 100)
     unconfident_letters = []
+    confident_pytesseract_list = []
+    for n in pytesseract_list:
+        confident_pytesseract_list.append(n)
     pytesseract_data = pytesseract.image_to_data(threshold, output_type='data.frame')
     for i in range(0, len(pytesseract_data)):
         if pytesseract_data.conf[i] == -1:
@@ -43,9 +46,9 @@ def low_confidence_rejection(pytesseract_list, threshold):
 
     # Removes low confidence words and their respective letters
     for n in unconfident_letters:
-        pytesseract_list.remove(n)
+        confident_pytesseract_list.remove(n)
 
-    return unconfident_letters
+    return confident_pytesseract_list
 
 def punctuation_analysis(img, text_contents):
     print(text_contents)
@@ -116,11 +119,11 @@ def character_analysis(img, text_contents):
     print(text_string)
 
     # Finds the confidence level for each prediction, and removes words below the minimum confidence Level
-    rejected_letters = low_confidence_rejection(pytesseract_list, threshold)  # returns rejected letters and their bounding boxes (if ever needed)
+    confident_pytesseract_list = low_confidence_rejection(pytesseract_list, threshold)  # returns confident letters and their bounding boxes after removing low confidence results
 
     #Adds confident words to the uncorrected text
     text_string = ""
-    for b in pytesseract_list:
+    for b in confident_pytesseract_list:
         # make each line into a list and place in the 2D list
         b = b.split(' ')
         text_array.append(b)
