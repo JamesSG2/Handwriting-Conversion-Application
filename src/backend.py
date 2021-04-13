@@ -213,14 +213,14 @@ def hconcat_whitespace(img1, img2):
     elif(vert_diff<0):
         pad = create_blank(img1.shape[1], abs(vert_diff), (255,255,255))
         img1_padded = cv2.vconcat([pad, img1])
-        return cv2.hconcat([img1_padded, img1_padded])
+        return cv2.hconcat([img1_padded, img2])
     else:
         return cv2.hconcat([img1, img2])
 
 def output_handwriting(name, phrase):
     # this will be used when outputting the reproduction of your handwriting
 
-    output_image = create_blank(10,75, (0,0,0))
+    output_image = create_blank(10,25, (255,255,255))
 
     for char in phrase:
         char_num = ord(char)
