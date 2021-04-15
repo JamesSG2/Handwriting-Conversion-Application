@@ -119,7 +119,8 @@ def character_analysis(img, text_contents):
     print(text_string)
 
     # Finds the confidence level for each prediction, and removes words below the minimum confidence Level
-    confident_pytesseract_list = low_confidence_rejection(pytesseract_list, threshold)  # returns confident letters and their bounding boxes after removing low confidence results
+    # returns confident letters and their bounding boxes after removing low confidence results
+    confident_pytesseract_list = low_confidence_rejection(pytesseract_list, threshold)
 
     #Adds confident words to the uncorrected text
     text_string = ""
@@ -217,8 +218,20 @@ def hconcat_whitespace(img1, img2):
     else:
         return cv2.hconcat([img1, img2])
 
+def vconcat_whitespace(img1, img2):
+    horiz_diff = img1.shape[1]-img2.shape[1]
+    if(horiz_diff>0):
+        pad = create_blank(horiz_diff, img2.shape[0], (255,255,255))
+        img2_padded = cv2.hconcat([img2, pad])
+        return cv2.vconcat([img1, img2_padded])
+    elif(horiz_diff<0):
+        pad = create_blank(abs(horiz_diff), img1.shape[0], (255,255,255))
+        img1_padded = cv2.hconcat([img1, pad])
+        return cv2.vconcat([img1_padded, img2])
+    else:
+        return cv2.vconcat([img1, img2])
 
-def save_line_image(name, image_to_save):
+def save_writing_image(name, image_to_save):
     try:
         os.makedirs('output\\' + name + '\\writing_result')
     except OSError:
@@ -291,7 +304,7 @@ def get_char(name, char, char_select):
 
 def output_handwriting_sample(name, phrase):
     # this will be used when outputting a first draft sample of your handwriting
-    output_image = create_blank(10,75, (0,0,0))
+    output_image = create_blank(10,10, (255,255,255))
     selection_list = []
 
     for char in phrase:
@@ -306,7 +319,7 @@ def output_handwriting_sample(name, phrase):
 
 def output_handwriting_revision(name, phrase, previous_list, list_of_errors):
 
-    output_image = create_blank(10,75, (0,0,0))
+    output_image = create_blank(10,10, (255,255,255))
     selection_list = []
 
     for i in range(len(phrase)):
@@ -324,6 +337,13 @@ def output_handwriting_revision(name, phrase, previous_list, list_of_errors):
 
     return output_image, selection_list
 
+def join_lines(list_of_line_images):
+    output_image = create_blank(10,10, (255,255,255))
+    for image in list_of_line_images:
+        output_image = vconcat_whitespace(output_image, image)
+    cv2.imshow("output", output_image)
+    cv2.waitKey(0)
+
 def create_correction_list(list_of_positions, length):
     # returns list containing False if the character does not need correction
     list_of_corrections = [False] * length
@@ -337,9 +357,9 @@ def main():
     os.chdir("..")
     # hopefully this section can have it's functionality replaced by the GUI
     print("Analyze new samples? [Y/N]:")
-    analysis = input()
+    analysis = input().lower()
 
-    if(analysis=="Y"):
+    if(analysis=="y"):
         print("Name: ")
         name = input()
         print("Image sample: ")
@@ -349,29 +369,35 @@ def main():
         # cv2.imshow("full", img)
         # cv2.waitKey(0)
 
-    elif(analysis=="N"):
+    elif(analysis=="n"):
         print("Name: ")
         name = input()
         print("What should be written:")
         phrase = input()
-        img, selection_list = output_handwriting_sample(name, phrase)
-        cv2.imshow("output", img)
-        cv2.waitKey(0)
-        print("Is correction needed? [Y/N]:")
-        needed = input().lower()
-        while needed == "y":
-            print("Correction locations?")
-            corrections = input().split(',')
-            list_of_corrections = create_correction_list(corrections, len(selection_list))
-            img, selection_list = output_handwriting_revision(name, phrase, \
-                selection_list, list_of_corrections)
-            cv2.imshow("output", img)
+        if phrase: # skips empty strings
+            phrase_lines = phrase.split(r"\n")
+        line_images = []
+        for line in phrase_lines:
+            single_line, selection_list = output_handwriting_sample(name, line)
+            cv2.imshow("output", single_line)
             cv2.waitKey(0)
             print("Is correction needed? [Y/N]:")
             needed = input().lower()
-        save_line_image(name, img)
-        cv2.imshow("output", img)
-        cv2.waitKey(0)
+            while needed == "y":
+                print("Correction locations?")
+                corrections = input().split(',')
+                list_of_corrections = create_correction_list(corrections, len(selection_list))
+                single_line, selection_list = output_handwriting_revision(name, line, \
+                    selection_list, list_of_corrections)
+                cv2.imshow("output", single_line)
+                cv2.waitKey(0)
+                print("Is correction needed? [Y/N]:")
+                needed = input().lower()
+            line_images.append(single_line)
+        join_lines(line_images)
+        # save_writing_image(name, img)
+        # cv2.imshow("output", img)
+        # cv2.waitKey(0)
 
     else:
         print("Error, did not select [Y/N]")
