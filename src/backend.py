@@ -341,8 +341,10 @@ def join_lines(list_of_line_images):
     output_image = create_blank(10,10, (255,255,255))
     for image in list_of_line_images:
         output_image = vconcat_whitespace(output_image, image)
-    cv2.imshow("output", output_image)
-    cv2.waitKey(0)
+    # cv2.imshow("output", output_image)
+    # cv2.waitKey(0)
+    return output_image
+
 
 def create_correction_list(list_of_positions, length):
     # returns list containing False if the character does not need correction
@@ -394,10 +396,10 @@ def main():
                 print("Is correction needed? [Y/N]:")
                 needed = input().lower()
             line_images.append(single_line)
-        join_lines(line_images)
-        # save_writing_image(name, img)
-        # cv2.imshow("output", img)
-        # cv2.waitKey(0)
+        final_image = join_lines(line_images)
+        save_writing_image(name, final_image)
+        cv2.imshow("output", final_image)
+        cv2.waitKey(0)
 
     else:
         print("Error, did not select [Y/N]")
