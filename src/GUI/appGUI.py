@@ -3,8 +3,6 @@ from tkinter import ttk
 import os
 
 from startScreen import StartScreen
-from tempProfile import TempProfile
-from tempGenerate import TempGenerate
 from profileSelectScreen import ProfileSelectScreen
 from profileCreateScreen import ProfileCreateScreen
 
@@ -23,7 +21,7 @@ class HandwritingApp(tk.Tk):
         self.searchProfiles()
 
         self.frames = {}
-        for F in (StartScreen, TempProfile, TempGenerate, ProfileSelectScreen, ProfileCreateScreen):
+        for F in (StartScreen, ProfileSelectScreen, ProfileCreateScreen):
             screenName = F.__name__
             frame = F(parent = container, controller = self)
             self.frames[screenName] = frame
