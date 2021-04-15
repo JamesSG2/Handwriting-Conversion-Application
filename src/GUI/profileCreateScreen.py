@@ -34,6 +34,11 @@ class ProfileCreateScreen(tk.Frame):
 
     def createWidgets(self, controller):
         self.backButton = ttk.Button(self, text = "Back", command = lambda: controller.showFrame("StartScreen"))
+        self.continueButton = ttk.Button(self, text = "Continue", command = lambda: controller.showFrame("ProfileCreateScreen"))
+        self.profileCreateFrame = tk.Frame(self, background = "gray")
+        self.profileCreateLabel = ttk.Label(self.profileCreateFrame, text = "Create a new Profile")
+        self.typeNameLabel = ttk.Label(self.profileCreateFrame, text = "Enter Name of Profile")
+        self.entry = ttk.Entry(self.profileCreateFrame)
         self.createCanvasElements()
 
     def configureRowsColumns(self):
@@ -43,21 +48,28 @@ class ProfileCreateScreen(tk.Frame):
 
         self.columnconfigure(0, weight = 1)
         self.columnconfigure(1, weight = 3)
-        self.columnconfigure(2, weight = 3)
+        self.columnconfigure(2, weight = 1)
         self.columnconfigure(3, weight = 1)
-        self.columnconfigure(4, weight = 1)
+        self.columnconfigure(4, weight = 3)
         self.columnconfigure(5, weight = 1)
+
         self.rowconfigure(0, weight = 1)
-        self.rowconfigure(1, weight = 3)
-        self.rowconfigure(2, weight = 3)
+        self.rowconfigure(1, weight = 4)
+        self.rowconfigure(2, weight = 4)
         self.rowconfigure(3, weight = 1)
 
         self.frame.columnconfigure(0, weight = 1)
 
+        self.profileCreateFrame.columnconfigure(0, weight = 1)
+        self.profileCreateFrame.rowconfigure(0, weight = 1)
+        self.profileCreateFrame.rowconfigure(1, weight = 4)
+        self.profileCreateFrame.rowconfigure(2, weight = 1)
+        self.profileCreateFrame.rowconfigure(3, weight = 1)
+
     def createCanvasElements(self):
         self.canvas = tk.Canvas(self)
         # set up frame and widget(s) on frame
-        self.frame = tk.Frame(self.canvas)
+        self.frame = tk.Frame(self.canvas, background = "gray")
         self.profileLabel = ttk.Label(self.frame, text = "Select Profile", justify = "center", anchor = "center")
         # make scroll bar for canvas
         self.scrollBar = ttk.Scrollbar(self, orient = "vertical", command = self.canvas.yview)
@@ -70,9 +82,14 @@ class ProfileCreateScreen(tk.Frame):
 
     def placeWidgets(self):
         self.backButton.grid(column = 0, row = 3, sticky = "nsew", padx = 10, pady = 10)
-        self.canvas.grid(column = 1, row = 0, columnspan = 2, rowspan = 4, sticky = "nsew", padx = 10, pady = 10)
+        self.continueButton.grid(column = 5, row = 3, sticky = "nsew", padx = 10, pady = 10)
+        self.canvas.grid(column = 1, row = 0, rowspan = 4, sticky = "nsew", padx = 10, pady = 10)
         self.profileLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
-        self.scrollBar.grid(column = 3, row = 0, rowspan = 4, sticky = "nsew", padx = 5, pady = 5)
+        self.scrollBar.grid(column = 2, row = 0, rowspan = 4, sticky = "nsew", padx = 5, pady = 5)
+        self.profileCreateFrame.grid(column = 4, row = 0, rowspan = 4, sticky = "nsew", padx = 10, pady = 10)
+        self.profileCreateLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 10, pady = 10)
+        self.typeNameLabel.grid(column = 0, row = 2, sticky = "nsew", padx = 10, pady = 10)
+        self.entry.grid(column = 0, row = 3, sticky = "nsew", padx = 10, pady = 10)
 
     def openProfile(self, profileName):
         print(profileName)
