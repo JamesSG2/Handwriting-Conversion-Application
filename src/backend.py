@@ -213,39 +213,12 @@ def hconcat_whitespace(img1, img2):
     elif(vert_diff<0):
         pad = create_blank(img1.shape[1], abs(vert_diff), (255,255,255))
         img1_padded = cv2.vconcat([pad, img1])
-        return cv2.hconcat([img1_padded, img1_padded])
+        return cv2.hconcat([img1_padded, img2])
     else:
         return cv2.hconcat([img1, img2])
 
-def output_handwriting(name, phrase):
-    # this will be used when outputting the reproduction of your handwriting
 
-    output_image = create_blank(10,75, (0,0,0))
-
-    for char in phrase:
-        char_num = ord(char)
-        char_str = str(char_num)
-
-        if(char_num>32):
-            try:
-                char_count = len(os.listdir('output\\' + name + '\\' \
-                    + char_str))
-            except FileNotFoundError:
-                print("could not find letter:" + char)
-                continue
-            if (char_count == 0):
-                print("could not find letter:" + char)
-                continue
-
-            char_select = random.randint(0, char_count-1)
-            char_img = cv2.imread('output\\' + name + '\\' + char_str \
-                + '\\' + char_str + "_" + str(char_select) + '.png')
-            output_image = hconcat_whitespace(output_image, char_img)
-
-        elif(char_num==32):
-            char_img = create_blank(50,50, (255,255,255))
-            output_image = hconcat_whitespace(output_image, char_img)
-
+def save_line_image(name, image_to_save):
     try:
         os.makedirs('output\\' + name + '\\writing_result')
     except OSError:
@@ -256,9 +229,107 @@ def output_handwriting(name, phrase):
     # appended to avoid duplicates
     location = 'output\\' + name + '\\writing_result\\result' \
         + "_" + str(result_count) + '.png'
-    cv2.imwrite(location, output_image)
+    cv2.imwrite(location, image_to_save)
 
-    return output_image
+    return True
+
+def get_char_rand(name, char):
+    # used to select a random character image
+    char_num = ord(char)
+    char_str = str(char_num)
+    # if the character is not whitespace
+    if(char_num>32):
+        # check how many if any of the character exists
+        try:
+            char_count = len(os.listdir('output\\' + name + '\\' \
+                + char_str))
+        except FileNotFoundError:
+            print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255)), 0
+
+        if (char_count == 0):
+            print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255)), 0
+        # select a random character
+        char_select = random.randint(0, char_count-1)
+        char_img = cv2.imread('output\\' + name + '\\' + char_str \
+            + '\\' + char_str + "_" + str(char_select) + '.png')
+
+    else:
+        # if the character is whitespace use a white square
+        char_img = create_blank(50,50, (255,255,255))
+        char_select = 0
+
+    return char_img, char_select
+
+def get_char(name, char, char_select):
+    # used to select predetermined character image
+    # essentially the same as get_char_rand
+    char_num = ord(char)
+    char_str = str(char_num)
+
+    if(char_num>32):
+        try:
+            char_count = len(os.listdir('output\\' + name + '\\' \
+                + char_str))
+        except FileNotFoundError:
+            print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255)), 0
+
+        if (char_count == 0):
+            print("could not find letter:" + char)
+            return create_blank(5,5, (255,255,255)), 0
+
+        char_img = cv2.imread('output\\' + name + '\\' + char_str \
+            + '\\' + char_str + "_" + str(char_select) + '.png')
+
+    elif(char_num==32):
+        char_img = create_blank(50,50, (255,255,255))
+        char_select = 0
+
+    return char_img, char_select
+
+def output_handwriting_sample(name, phrase):
+    # this will be used when outputting a first draft sample of your handwriting
+    output_image = create_blank(10,75, (0,0,0))
+    selection_list = []
+
+    for char in phrase:
+        char_img, char_pos = get_char_rand(name, char)
+        output_image = hconcat_whitespace(output_image, char_img)
+        selection_list.append(char_pos)
+
+    # save_line_image(name, output_image)
+    print(selection_list)
+
+    return output_image, selection_list
+
+def output_handwriting_revision(name, phrase, previous_list, list_of_errors):
+
+    output_image = create_blank(10,75, (0,0,0))
+    selection_list = []
+
+    for i in range(len(phrase)):
+        # if a character was marked as needing correction get a random new image
+        # otherwise use the same image as before
+        if(list_of_errors[i]):
+            char_img, char_pos = get_char_rand(name, phrase[i])
+        else:
+            char_img, char_pos = get_char(name, phrase[i], previous_list[i])
+        output_image = hconcat_whitespace(output_image, char_img)
+        selection_list.append(char_pos)
+
+    # save_line_image(name, output_image)
+    print(selection_list)
+
+    return output_image, selection_list
+
+def create_correction_list(list_of_positions, length):
+    # returns list containing False if the character does not need correction
+    list_of_corrections = [False] * length
+    for position in list_of_positions:
+        list_of_corrections[int(position)] = True
+    return list_of_corrections
 
 # These functions run the program
 def main():
@@ -283,7 +354,22 @@ def main():
         name = input()
         print("What should be written:")
         phrase = input()
-        img = output_handwriting(name, phrase)
+        img, selection_list = output_handwriting_sample(name, phrase)
+        cv2.imshow("output", img)
+        cv2.waitKey(0)
+        print("Is correction needed? [Y/N]:")
+        needed = input().lower()
+        while needed == "y":
+            print("Correction locations?")
+            corrections = input().split(',')
+            list_of_corrections = create_correction_list(corrections, len(selection_list))
+            img, selection_list = output_handwriting_revision(name, phrase, \
+                selection_list, list_of_corrections)
+            cv2.imshow("output", img)
+            cv2.waitKey(0)
+            print("Is correction needed? [Y/N]:")
+            needed = input().lower()
+        save_line_image(name, img)
         cv2.imshow("output", img)
         cv2.waitKey(0)
 
