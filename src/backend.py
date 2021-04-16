@@ -50,6 +50,15 @@ def low_confidence_rejection(pytesseract_list, threshold):
 
     return confident_pytesseract_list
 
+def multi_letter_finder(letter_img, avg_w, w_standard_deviation):
+    ht, w = letter_img.shape
+    letter_w = w
+    z_score = (letter_w - avg_w) / w_standard_deviation
+    if (z_score > 1.9):
+        return True
+    else:
+        return False
+
 def punctuation_analysis(img, text_contents):
     print(text_contents)
     # use hsv colorspace
@@ -136,6 +145,21 @@ def character_analysis(img, text_contents):
     print("\nCorrected to:")
     print(text_string)
 
+    # Calculates the average character-image width and the standard deviation of the widths (for the multi_letter_finder function)
+    sum_w = 0
+    w_list = []
+    for i in range(len(text_array)):
+        img = resized[h-int(text_array[i][4]):h-int(text_array[i][2]), \
+            int(text_array[i][1]):int(text_array[i][3])]
+        ht, w = img.shape
+        sum_w += w
+        w_list.append(w)
+    avg_w = sum_w / len(text_array)
+    w_standard_deviation = 0
+    for i in range(len(text_array)):
+        w_standard_deviation += ((w_list[i] - avg_w)**2) / len(text_array)
+    w_standard_deviation = (w_standard_deviation)**(1/2)
+
     # store cropped images in list with their character
     image_list = []
     for i in range(len(text_array)):
@@ -145,7 +169,7 @@ def character_analysis(img, text_contents):
         # get the unicode number of the character and check if it is a letter
         char_num = ord(text_array[i][0])
         if(((char_num>=65) and (char_num<=90)) \
-            or ((char_num>=97) and (char_num<=122))):
+            or ((char_num>=97) and (char_num<=122))) and (multi_letter_finder(cropped, avg_w, w_standard_deviation) == False):  # doesn't save images that are suspect of being multi-letter
             # store cropped image and it's character in a nested list
             storage_list = [cropped, text_string[i]]
             image_list.append(storage_list)
