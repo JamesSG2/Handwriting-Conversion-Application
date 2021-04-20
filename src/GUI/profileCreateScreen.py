@@ -34,7 +34,7 @@ class ProfileCreateScreen(tk.Frame):
 
     def createWidgets(self, controller):
         self.backButton = ttk.Button(self, text = "Back", command = lambda: controller.showFrame("StartScreen"))
-        self.continueButton = ttk.Button(self, text = "Continue", command = lambda: controller.showFrame("ProfileCreateScreen"))
+        self.continueButton = ttk.Button(self, text = "Continue", command = lambda: controller.showFrame("UploadDataScreen"))
         self.profileCreateFrame = tk.Frame(self, background = "gray")
         self.profileCreateLabel = ttk.Label(self.profileCreateFrame, text = "Create a new Profile")
         self.typeNameLabel = ttk.Label(self.profileCreateFrame, text = "Enter Name of Profile")
