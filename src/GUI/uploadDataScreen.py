@@ -35,7 +35,4 @@ class UploadDataScreen(tk.Frame):
     def placeWidgets(self):
         self.backButton.grid(column = 0, row = 3, sticky = "nsew", padx = 10, pady = 10)
 
-    def openProfile(self, profileName):
-        print(profileName)
-
         
