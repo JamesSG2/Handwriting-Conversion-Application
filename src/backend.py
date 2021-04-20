@@ -257,6 +257,14 @@ def save_line_image(name, image_to_save):
 
     return True
 
+def mark_char_as_bad(name, char, char_select):
+    path_to_file = 'output\\' + name + '\\' + char + '\\' + char + "_" + str(char_select)
+    if(os.path.isfile(path_to_file + ".png")):
+        os.rename((path_to_file + ".png"), (path_to_file+"_bad.png"))
+    else:
+        return False
+    return True
+
 def get_char_rand(name, char):
     # used to select a random character image
     char_num = ord(char)
@@ -275,9 +283,16 @@ def get_char_rand(name, char):
             print("could not find letter:" + char)
             return create_blank(5,5, (255,255,255)), 0
         # select a random character
-        char_select = random.randint(0, char_count-1)
-        char_img = cv2.imread('output\\' + name + '\\' + char_str \
-            + '\\' + char_str + "_" + str(char_select) + '.png')
+        good_selection = False
+        while(good_selection == False):
+            char_select = random.randint(0, char_count-1)
+            if(os.path.isfile('output\\' + name + '\\' + char_str \
+                + '\\' + char_str + "_" + str(char_select) + '.png')):
+                char_img = cv2.imread('output\\' + name + '\\' + char_str \
+                    + '\\' + char_str + "_" + str(char_select) + '.png')
+                good_selection = True
+            else:
+                good_selection = False
 
     else:
         # if the character is whitespace use a white square
