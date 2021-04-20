@@ -7,6 +7,7 @@ from profileSelectScreen import ProfileSelectScreen
 from profileCreateScreen import ProfileCreateScreen
 from uploadDataScreen import UploadDataScreen
 from goHomeScreen import GoHomeScreen
+from handwritingGenerateScreen import HandwritingGenerateScreen
 
 class HandwritingApp(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -20,10 +21,11 @@ class HandwritingApp(tk.Tk):
         self.rowconfigure(0, weight = 1)
 
         self.profileList = []
+        self.selectedProfile = ""
         self.searchProfiles()
 
         self.frames = {}
-        for F in (StartScreen, ProfileSelectScreen, ProfileCreateScreen, UploadDataScreen, GoHomeScreen):
+        for F in (StartScreen, ProfileSelectScreen, ProfileCreateScreen, UploadDataScreen, GoHomeScreen, HandwritingGenerateScreen):
             screenName = F.__name__
             frame = F(parent = container, controller = self)
             self.frames[screenName] = frame

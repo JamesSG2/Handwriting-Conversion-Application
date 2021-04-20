@@ -6,6 +6,7 @@ class ProfileSelectScreen(tk.Frame):
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         self.parent = parent
+        self.controller = controller
         # List of all profiles (folders) in output
         self.profileList = controller.profileList
         # makes widgets
@@ -22,7 +23,7 @@ class ProfileSelectScreen(tk.Frame):
         # places a button for every profile
         if(len(self.profileList) > 0):
             for index in range(0, len(self.profileList)):
-                self.button = ttk.Button(self.frame, text = self.profileList[index], command = lambda x = self.profileList[index]: self.openProfile(x))
+                self.button = ttk.Button(self.frame, text = self.profileList[index], command = lambda x = self.profileList[index], y = self.controller: self.openProfile(x, y))
                 self.button.grid(column = 0, row = index + 1, sticky = "nsew", padx = 100, pady = 2)
 
     def configCanvas(self, event):
@@ -74,7 +75,9 @@ class ProfileSelectScreen(tk.Frame):
         self.profileLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
         self.scrollBar.grid(column = 3, row = 0, rowspan = 4, sticky = "nsew", padx = 5, pady = 5)
 
-    def openProfile(self, profileName):
+    def openProfile(self, profileName, controller):
         print(profileName)
+        controller.selectedProfile = profileName
+        controller.showFrame("HandwritingGenerateScreen")
 
         
