@@ -258,7 +258,8 @@ def save_line_image(name, image_to_save):
     return True
 
 def mark_char_as_bad(name, char, char_select):
-    path_to_file = 'output\\' + name + '\\' + char + '\\' + char + "_" + str(char_select)
+    char_str = str(ord(char))
+    path_to_file = 'output\\' + name + '\\' + char_str + '\\' + char_str + "_" + str(char_select)
     if(os.path.isfile(path_to_file + ".png")):
         os.rename((path_to_file + ".png"), (path_to_file+"_bad.png"))
     else:
@@ -286,10 +287,10 @@ def get_char_rand(name, char):
         good_selection = False
         while(good_selection == False):
             char_select = random.randint(0, char_count-1)
-            if(os.path.isfile('output\\' + name + '\\' + char_str \
-                + '\\' + char_str + "_" + str(char_select) + '.png')):
-                char_img = cv2.imread('output\\' + name + '\\' + char_str \
-                    + '\\' + char_str + "_" + str(char_select) + '.png')
+            path_to_file = ('output\\' + name + '\\' + char_str \
+                            + '\\' + char_str + "_" + str(char_select) + '.png')
+            if(os.path.isfile(path_to_file)):
+                char_img = cv2.imread(path_to_file)
                 good_selection = True
             else:
                 good_selection = False
@@ -318,9 +319,16 @@ def get_char(name, char, char_select):
         if (char_count == 0):
             print("could not find letter:" + char)
             return create_blank(5,5, (255,255,255)), 0
-
-        char_img = cv2.imread('output\\' + name + '\\' + char_str \
-            + '\\' + char_str + "_" + str(char_select) + '.png')
+        good_selection = False
+        while(good_selection == False):
+            path_to_file = ('output\\' + name + '\\' + char_str \
+                            + '\\' + char_str + "_" + str(char_select) + '.png')
+            if(os.path.isfile(path_to_file)):
+                char_img = cv2.imread(path_to_file)
+                good_selection = True
+            else:
+                char_select = random.randint(0, char_count-1)
+                good_selection = False
 
     elif(char_num==32):
         char_img = create_blank(50,50, (255,255,255))
@@ -352,6 +360,7 @@ def output_handwriting_revision(name, phrase, previous_list, list_of_errors):
         # if a character was marked as needing correction get a random new image
         # otherwise use the same image as before
         if(list_of_errors[i]):
+            mark_char_as_bad(name, phrase[i], previous_list[i])
             char_img, char_pos = get_char_rand(name, phrase[i])
         else:
             char_img, char_pos = get_char(name, phrase[i], previous_list[i])
