@@ -41,6 +41,8 @@ class UploadDataScreen(tk.Frame):
         for x in (0, len(self.files)-1):
             backend.analyze_sample(self.controller.selectedProfile, self.files[x])
         self.controller.showFrame("GoHomeScreen")
+        self.continueButton.grid_remove()
+        self.files = ""
 
     def configureRowsColumns(self):
         # resize configs
