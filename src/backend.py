@@ -119,22 +119,21 @@ def character_analysis(img, text_contents):
 
 def analyze_sample(name, target):
     # open image
-    # original = cv2.imread('data\\' + name + '\\' + target + '.png')
-    original = cv2.imread(target)
+    original = cv2.imread('data\\' + name + '\\' + target + '.png')
 
     # open text
-    #try:
-        #with open('data\\' + name + '\\' + target + '.txt') as file:
-            #text_contents = file.read()
-            #text_contents = re.sub(r"\s", "", text_contents)
-            #file.close()
-    #except FileNotFoundError:
-        #print("Couldn't find text file. Will not spellcheck.")
-        #text_contents = ""
+    try:
+        with open('data\\' + name + '\\' + target + '.txt') as file:
+            text_contents = file.read()
+            text_contents = re.sub(r"\s", "", text_contents)
+            file.close()
+    except FileNotFoundError:
+        print("Couldn't find text file. Will not spellcheck.")
+        text_contents = ""
 
-    #print("Analyzing: " + target + " from " + name)
-    #print("Expect to find:")
-    #print(text_contents)
+    print("Analyzing: " + target + " from " + name)
+    print("Expect to find:")
+    print(text_contents)
     text_contents = ""
     print("Found:")
 
