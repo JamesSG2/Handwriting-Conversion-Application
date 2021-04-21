@@ -49,8 +49,8 @@ class HandwritingGenerateScreen(tk.Frame):
         self.after(1000, lambda: self.createImage(self.controller, self.entry.get()))
 
     def createWidgets(self, controller):
-        self.backButton = ttk.Button(self, text = "Back", command = lambda: controller.showFrame("StartScreen"))
-        self.continueButton = ttk.Button(self, text = "Continue", command = lambda: controller.showFrame("UploadDataScreen"))
+        self.backButton = ttk.Button(self, text = "Back", command = lambda: controller.showFrame("ProfileSelectScreen"))
+        self.saveButton = ttk.Button(self, text = "Save")
         self.createCanvasElements()
         self.entry = ttk.Entry(self.textFrame)
         self.entry.bind("<Key>", self.handleWait)
@@ -98,7 +98,7 @@ class HandwritingGenerateScreen(tk.Frame):
 
     def placeWidgets(self):
         self.backButton.grid(column = 0, row = 3, sticky = "nsew", padx = 10, pady = 10)
-        self.continueButton.grid(column = 6, row = 3, sticky = "nsew", padx = 10, pady = 10)
+        self.saveButton.grid(column = 6, row = 3, sticky = "nsew", padx = 10, pady = 10)
         self.textCanvas.grid(column = 1, row = 1, sticky = "nsew", padx = 10, pady = 10)
         self.writingCanvas.grid(column = 4, row = 1, sticky = "nsew", padx = 10, pady = 10)
         self.textLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
