@@ -9,8 +9,7 @@ class HandwritingGenerateScreen(tk.Frame):
         ttk.Frame.__init__(self, parent)
         self.parent = parent
         self.controller = controller
-        self._after_id = "createImage"
-        # self.handwritingImage = self.createImage(controller, "")
+        self._after_id = None
         # List of all profiles (folders) in output
         self.profileList = controller.profileList
         # makes widgets
