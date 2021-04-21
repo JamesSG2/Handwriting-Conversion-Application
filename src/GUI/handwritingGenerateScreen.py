@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 from PIL import ImageTk, Image
 import os
 import backend
+import cv2
 
 class HandwritingGenerateScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -51,9 +53,18 @@ class HandwritingGenerateScreen(tk.Frame):
         self.entry.delete(0, tk.END)
         self.writing = ""
 
+    def saveImage(self):
+        fileTypes = [('PNG', '*.png'), ('All Files', '*.*')]
+        file = filedialog.asksaveasfilename(defaultextension = fileTypes, title = "Save Handwriting", filetypes = fileTypes)
+        if file is None:
+            return
+        img = cv2.imread("output\\"+self.controller.selectedProfile+"\\writing_result\\result.png")
+        imageToSave = Image.fromarray(img)
+        imageToSave.save(file)
+
     def createWidgets(self, controller):
         self.backButton = ttk.Button(self, text = "Back", command = self.goBack)
-        self.saveButton = ttk.Button(self, text = "Save")
+        self.saveButton = ttk.Button(self, text = "Save", command = self.saveImage)
         self.createCanvasElements()
         self.entry = ttk.Entry(self.textFrame)
         self.entry.bind("<Key>", self.handleWait)
