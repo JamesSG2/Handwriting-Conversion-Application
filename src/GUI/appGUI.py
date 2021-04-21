@@ -2,12 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 import os
 
-from startScreen import StartScreen
-from profileSelectScreen import ProfileSelectScreen
-from profileCreateScreen import ProfileCreateScreen
-from uploadDataScreen import UploadDataScreen
-from goHomeScreen import GoHomeScreen
-from handwritingGenerateScreen import HandwritingGenerateScreen
+from GUI.startScreen import StartScreen
+from GUI.profileSelectScreen import ProfileSelectScreen
+from GUI.profileCreateScreen import ProfileCreateScreen
+from GUI.uploadDataScreen import UploadDataScreen
+from GUI.goHomeScreen import GoHomeScreen
+from GUI.handwritingGenerateScreen import HandwritingGenerateScreen
 
 class HandwritingApp(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -35,6 +35,9 @@ class HandwritingApp(tk.Tk):
     def showFrame(self, screenName):
         frame = self.frames[screenName]
         frame.tkraise()
+
+    def selectProfile(self, profileName):
+        self.selectedProfile = profileName
 
     def searchProfiles(self):
         root='output'

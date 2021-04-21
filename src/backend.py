@@ -220,7 +220,7 @@ def output_handwriting(name, phrase):
     # save the image with the number of images already in the folder
     # appended to avoid duplicates
     location = 'output\\' + name + '\\writing_result\\result' \
-        + "_" + str(result_count) + '.png'
+        + '.png'
     cv2.imwrite(location, output_image)
 
     return output_image
@@ -228,7 +228,7 @@ def output_handwriting(name, phrase):
 # These functions run the program
 def main():
 
-    os.chdir("..")
+    #os.chdir("..")
     # hopefully this section can have it's functionality replaced by the GUI
     print("Analyze new samples? [Y/N]:")
     analysis = input()

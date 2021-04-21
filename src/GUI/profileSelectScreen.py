@@ -77,7 +77,7 @@ class ProfileSelectScreen(tk.Frame):
 
     def openProfile(self, profileName, controller):
         print(profileName)
-        controller.selectedProfile = profileName
+        controller.selectProfile(profileName)
         controller.showFrame("HandwritingGenerateScreen")
 
         

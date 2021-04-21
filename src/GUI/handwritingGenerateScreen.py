@@ -1,11 +1,16 @@
 import tkinter as tk
 from tkinter import ttk
+from PIL import ImageTk, Image
 import os
+import backend
 
 class HandwritingGenerateScreen(tk.Frame):
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         self.parent = parent
+        self.controller = controller
+        self._after_id = "createImage"
+        # self.handwritingImage = self.createImage(controller, "")
         # List of all profiles (folders) in output
         self.profileList = controller.profileList
         # makes widgets
@@ -14,6 +19,13 @@ class HandwritingGenerateScreen(tk.Frame):
         self.placeWidgets()
         # resize rows and columns on grid
         self.configureRowsColumns()
+
+    def createImage(self, controller, text):
+        if controller.selectedProfile != "":
+            backend.output_handwriting(controller.selectedProfile, text)
+            self.displayImage = Image.open("output\\"+self.controller.selectedProfile+"\\writing_result\\result.png")
+            self.writing = ImageTk.PhotoImage(self.displayImage)
+            self.writingCanvas.create_image(0, 0, anchor = "nw", image = self.writing)
 
     def configTextCanvas(self, event):
         self.textCanvas.configure(scrollregion = self.textCanvas.bbox("all"))
@@ -29,11 +41,20 @@ class HandwritingGenerateScreen(tk.Frame):
         canvas_width = event.width
         self.writingCanvas.itemconfig(self.writingCanvasFrame, width = canvas_width)
 
+    def handleWait(self, event):
+        if self._after_id is not None:
+            self.after_cancel(self._after_id)
+
+        # create a new job
+        self.after(1000, lambda: self.createImage(self.controller, self.entry.get()))
+
     def createWidgets(self, controller):
         self.backButton = ttk.Button(self, text = "Back", command = lambda: controller.showFrame("StartScreen"))
         self.continueButton = ttk.Button(self, text = "Continue", command = lambda: controller.showFrame("UploadDataScreen"))
         self.createCanvasElements()
         self.entry = ttk.Entry(self.textFrame)
+        self.entry.bind("<Key>", self.handleWait)
+
 
     def configureRowsColumns(self):
         # resize configs
@@ -82,6 +103,6 @@ class HandwritingGenerateScreen(tk.Frame):
         self.writingCanvas.grid(column = 4, row = 1, sticky = "nsew", padx = 10, pady = 10)
         self.textLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
         self.writingLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
-        self.textScrollBar.grid(column = 2, row = 0, rowspan = 4, sticky = "nsew", padx = 5, pady = 5)
-        self.writingScrollBar.grid(column = 5, row = 0, rowspan = 4, sticky = "nsew", padx = 5, pady = 5)
+        self.textScrollBar.grid(column = 2, row = 0, rowspan = 3, sticky = "nsew", padx = 5, pady = 5)
+        self.writingScrollBar.grid(column = 5, row = 0, rowspan = 3, sticky = "nsew", padx = 5, pady = 5)
         self.entry.grid(column = 0, row = 1, sticky = "nsew", padx = 10, pady = 10)
