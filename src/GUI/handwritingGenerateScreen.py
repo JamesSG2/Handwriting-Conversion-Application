@@ -43,12 +43,16 @@ class HandwritingGenerateScreen(tk.Frame):
     def handleWait(self, event):
         if self._after_id is not None:
             self.after_cancel(self._after_id)
-
         # create a new job
         self.after(1000, lambda: self.createImage(self.controller, self.entry.get()))
 
+    def goBack(self):
+        self.controller.showFrame("ProfileSelectScreen")
+        self.entry.delete(0, tk.END)
+        self.writing = ""
+
     def createWidgets(self, controller):
-        self.backButton = ttk.Button(self, text = "Back", command = lambda: controller.showFrame("ProfileSelectScreen"))
+        self.backButton = ttk.Button(self, text = "Back", command = self.goBack)
         self.saveButton = ttk.Button(self, text = "Save")
         self.createCanvasElements()
         self.entry = ttk.Entry(self.textFrame)
