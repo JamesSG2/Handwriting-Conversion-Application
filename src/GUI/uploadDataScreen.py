@@ -38,7 +38,9 @@ class UploadDataScreen(tk.Frame):
             self.continueButton.grid_remove()
 
     def analyzeData(self):
-        for x in (0, len(self.files)-1):
+        print("debug1")
+        for x in range(0, len(self.files)):
+            print("debug2")
             f_name, f_ext = os.path.splitext(os.path.basename(self.files[x]))
             backend.analyze_sample(self.controller.selectedProfile, f_name)
         self.controller.showFrame("GoHomeScreen")
