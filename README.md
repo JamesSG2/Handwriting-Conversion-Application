@@ -9,3 +9,5 @@ The Development branch (dev) is the main development branch. The dev branch’s 
 Further Explaination of dev Branch and GitHub Repository Conventions:
 https://codingsight.com/git-branching-naming-convention-best-practices/
 
+# backend.exe
+Currenty not funtional. Will work through some of the issues soon, but in the meantime don't try to run this program expecting it to work.
