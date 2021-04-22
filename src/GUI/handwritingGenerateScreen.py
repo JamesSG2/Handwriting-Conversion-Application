@@ -23,10 +23,11 @@ class HandwritingGenerateScreen(tk.Frame):
 
     def createImage(self, controller, text):
         if controller.selectedProfile != "":
-            backend.output_handwriting(controller.selectedProfile, text)
-            self.displayImage = Image.open("output\\"+self.controller.selectedProfile+"\\writing_result\\result.png")
+            single_line, selection_list = backend.output_handwriting_sample(controller.selectedProfile, text)
+            # self.displayImage = Image.open("output\\"+self.controller.selectedProfile+"\\writing_result\\result.png")
+            self.displayImage = Image.fromarray(cv2.cvtColor(single_line, cv2.COLOR_BGR2RGB))
             self.writing = ImageTk.PhotoImage(self.displayImage)
-            self.writingCanvas.create_image(0, 0, anchor = "nw", image = self.writing)
+            self.writingCanvas.create_image(0, 50, anchor = "nw", image = self.writing)
 
     def configTextCanvas(self, event):
         self.textCanvas.configure(scrollregion = self.textCanvas.bbox("all"))
@@ -58,9 +59,7 @@ class HandwritingGenerateScreen(tk.Frame):
         file = filedialog.asksaveasfilename(defaultextension = fileTypes, title = "Save Handwriting", filetypes = fileTypes)
         if file is None:
             return
-        img = cv2.imread("output\\"+self.controller.selectedProfile+"\\writing_result\\result.png")
-        imageToSave = Image.fromarray(img)
-        imageToSave.save(file)
+        self.displayImage.save(file)
 
     def createWidgets(self, controller):
         self.backButton = ttk.Button(self, text = "Back", command = self.goBack)
