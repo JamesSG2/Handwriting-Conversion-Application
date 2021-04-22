@@ -266,7 +266,6 @@ def save_writing_image(name, image_to_save):
     # save the image with the number of images already in the folder
     # appended to avoid duplicates
     location = 'output\\' + name + '\\writing_result\\result' \
-
         + "_" + str(result_count) + '.png'
     cv2.imwrite(location, image_to_save)
 
