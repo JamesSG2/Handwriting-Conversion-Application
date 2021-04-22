@@ -75,14 +75,14 @@ class HandwritingGenerateScreen(tk.Frame):
 
     def generateRevision(self):
         # TEMP:
-        corrections = ""
-        self.createRevision(self.controller, self.entry.get(), corrections)
+        self.createRevision(self.controller, self.entry.get(), self.revise.get().split(','))
 
     def createWidgets(self, controller):
         self.backButton = ttk.Button(self, text = "Back", command = self.goBack)
         self.saveButton = ttk.Button(self, text = "Save", command = self.saveImage)
         self.createCanvasElements()
         self.entry = ttk.Entry(self.textFrame)
+        self.revise = ttk.Entry(self.textFrame)
         self.sampleButton = ttk.Button(self, text = "Generate Sample", command = self.generateSample)
         self.revisionButton = ttk.Button(self, text = "Generate Revision", command = self.generateRevision)
 
@@ -115,6 +115,7 @@ class HandwritingGenerateScreen(tk.Frame):
         self.textFrame = tk.Frame(self.textCanvas, background = "gray")
         self.writingFrame = tk.Frame(self.writingCanvas, background = "gray")
         self.textLabel = ttk.Label(self.textFrame, text = "Enter Text", justify = "center", anchor = "center")
+        self.revisionLabel = ttk.Label(self.textFrame, text = "Index of Errors", justify = "center", anchor = "center")
         self.writingLabel = ttk.Label(self.writingFrame, text = "Result", justify = "center", anchor = "center")
         # make scroll bar for canvas
         self.textScrollBar = ttk.Scrollbar(self, orient = "vertical", command = self.textCanvas.yview)
@@ -138,7 +139,9 @@ class HandwritingGenerateScreen(tk.Frame):
         self.textCanvas.grid(column = 1, row = 1, sticky = "nsew", padx = 10, pady = 10)
         self.writingCanvas.grid(column = 4, row = 1, sticky = "nsew", padx = 10, pady = 10)
         self.textLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
+        self.revisionLabel.grid(column = 0, row = 2, sticky = "nsew", padx = 100, pady = 10)
         self.writingLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
         self.textScrollBar.grid(column = 2, row = 0, rowspan = 3, sticky = "nsew", padx = 5, pady = 5)
         self.writingScrollBar.grid(column = 5, row = 0, rowspan = 3, sticky = "nsew", padx = 5, pady = 5)
         self.entry.grid(column = 0, row = 1, sticky = "nsew", padx = 10, pady = 10)
+        self.revise.grid(column = 0, row = 3, sticky = "nsew", padx = 10, pady = 10)
