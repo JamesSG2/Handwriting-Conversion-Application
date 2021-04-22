@@ -21,9 +21,19 @@ class HandwritingGenerateScreen(tk.Frame):
         # resize rows and columns on grid
         self.configureRowsColumns()
 
-    def createImage(self, controller, text):
+    def createSample(self, controller, text):
         if controller.selectedProfile != "":
             single_line, selection_list = backend.output_handwriting_sample(controller.selectedProfile, text)
+            self.selectionList = selection_list
+            self.displayImage = Image.fromarray(cv2.cvtColor(single_line, cv2.COLOR_BGR2RGB))
+            self.writing = ImageTk.PhotoImage(self.displayImage)
+            self.writingCanvas.create_image(0, 50, anchor = "nw", image = self.writing)
+
+    def createRevision(self, controller, text, corrections):
+        if controller.selectedProfile != "":
+            list_of_corrections = backend.create_correction_list(corrections, len(self.selectionList))
+            single_line, selection_list = backend.output_handwriting_revision(controller.selectedProfile, text, self.selectionList, list_of_corrections)
+            self.selectionList = selection_list
             self.displayImage = Image.fromarray(cv2.cvtColor(single_line, cv2.COLOR_BGR2RGB))
             self.writing = ImageTk.PhotoImage(self.displayImage)
             self.writingCanvas.create_image(0, 50, anchor = "nw", image = self.writing)
@@ -60,15 +70,21 @@ class HandwritingGenerateScreen(tk.Frame):
             return
         self.displayImage.save(file)
 
-    def generateImage(self):
-        self.createImage(self.controller, self.entry.get())
+    def generateSample(self):
+        self.createSample(self.controller, self.entry.get())
+
+    def generateRevision(self):
+        # TEMP:
+        corrections = ""
+        self.createRevision(self.controller, self.entry.get(), corrections)
 
     def createWidgets(self, controller):
         self.backButton = ttk.Button(self, text = "Back", command = self.goBack)
         self.saveButton = ttk.Button(self, text = "Save", command = self.saveImage)
         self.createCanvasElements()
         self.entry = ttk.Entry(self.textFrame)
-        self.generateButton = ttk.Button(self, text = "Generate", command = self.generateImage)
+        self.sampleButton = ttk.Button(self, text = "Generate Sample", command = self.generateSample)
+        self.revisionButton = ttk.Button(self, text = "Generate Revision", command = self.generateRevision)
 
 
     def configureRowsColumns(self):
@@ -85,8 +101,11 @@ class HandwritingGenerateScreen(tk.Frame):
         self.columnconfigure(6, weight = 1)
 
         self.rowconfigure(0, weight = 1)
-        self.rowconfigure(1, weight = 8)
+        self.rowconfigure(1, weight = 1)
         self.rowconfigure(2, weight = 1)
+        self.rowconfigure(3, weight = 1)
+        self.rowconfigure(4, weight = 1)
+        self.rowconfigure(5, weight = 1)
 
 
     def createCanvasElements(self):
@@ -112,9 +131,10 @@ class HandwritingGenerateScreen(tk.Frame):
         self.writingCanvas.configure(yscrollcommand = self.writingScrollBar.set, highlightthickness = 0)
 
     def placeWidgets(self):
-        self.backButton.grid(column = 0, row = 3, sticky = "nsew", padx = 10, pady = 10)
-        self.saveButton.grid(column = 6, row = 3, sticky = "nsew", padx = 10, pady = 10)
-        self.generateButton.grid(column = 1, row = 2, sticky = "nsew", padx = 10, pady = 10)
+        self.backButton.grid(column = 0, row = 5, sticky = "nsew", padx = 10, pady = 10)
+        self.saveButton.grid(column = 6, row = 5, sticky = "nsew", padx = 10, pady = 10)
+        self.sampleButton.grid(column = 1, row = 2, sticky = "nsew", padx = 10, pady = 10)
+        self.revisionButton.grid(column = 1, row = 4, sticky = "nsew", padx = 10, pady = 10)
         self.textCanvas.grid(column = 1, row = 1, sticky = "nsew", padx = 10, pady = 10)
         self.writingCanvas.grid(column = 4, row = 1, sticky = "nsew", padx = 10, pady = 10)
         self.textLabel.grid(column = 0, row = 0, sticky = "nsew", padx = 100, pady = 10)
